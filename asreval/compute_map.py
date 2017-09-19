@@ -143,7 +143,9 @@ def load_cnets(cnet_list, use_channel):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        prog='compute_map',
+        description='Compute Mean Average Precision for KWS')
 
     parser.add_argument('--term-list',
                         dest='term_list',
