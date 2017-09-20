@@ -26,7 +26,7 @@ setup(
     ],
     tests_require=['pytest'],
     setup_requires=['pytest-runner'],
-    install_requires=[],
+    install_requires=['future'],
     entry_points={
         'console_scripts': [
             'compute_map = asreval.compute_map:main',

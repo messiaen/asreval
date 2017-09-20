@@ -1,3 +1,14 @@
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from builtins import open
+from builtins import range
+from builtins import int
+from builtins import *
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 import argparse
 import re
 import sys
@@ -6,7 +17,7 @@ from asreval import Stm
 from asreval import Cnet
 
 
-class MAP:
+class MAP(object):
     def __init__(self, word_list, hypothesis, ref):
         self.word_list = word_list
         self.hypothesis = hypothesis
