@@ -121,7 +121,10 @@ class Utterance(object):
             return False
 
     def percent_in(self, hypothesis_start, hypothesis_end):
-        duration = hypothesis_end - hypothesis_start
+        duration = float(hypothesis_end - hypothesis_start)
+        # for zero length edge there's nothing to be in
+        if duration == 0.0:
+            return 0.0
         return (duration - min(duration, max(0, self.start - hypothesis_start))
                 - min(duration, max(0, hypothesis_end - self.end))) / duration
 
