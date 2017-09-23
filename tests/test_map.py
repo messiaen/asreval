@@ -2,7 +2,7 @@ import os
 
 from asreval.compute_map import MAP
 from asreval.compute_map import load_stm
-from asreval.cnet import Cnet
+from asreval.cnet import CnetOld
 
 
 def test_map_orig():
@@ -13,7 +13,7 @@ def test_map_orig():
                     filter(lambda x: x.endswith('.lat'),
                            os.listdir(cnet_dir)))
 
-    cnet = Cnet('directory')
+    cnet = CnetOld('directory')
     for fn in cnet_list:
         cnet.load(fn)
 

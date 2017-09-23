@@ -11,12 +11,90 @@ import re
 import gzip
 import os
 from collections import defaultdict
+from collections import namedtuple
 
 
-class Cnet(object):
+CnetEdge = namedtuple('CnetEdge', ['start', 'end', 'word', 'score'])
+
+
+class CnetIndex(object):
+    def __init__(self, utterances):
+        self._words = defaultdict(list)
+        for uttr in utterances:
+            for edge in uttr:
+                self._words[edge.word].append(uttr)
+
+    @property
+    def words(self):
+        return self._words
+
+    def __getitem__(self, item):
+        if not isinstance(item, str):
+            raise TypeError('Key must be a of type str not {}'.format(
+                type(item)))
+        if item in self.words:
+            return self.words[item]
+        return []
+
+
+class CnetUtterance(object):
+    def __init__(self, start, end, edges, channel=None, uttr_id=None):
+        self._start = float(start)
+        self._end = float(end)
+        self._channel = channel
+        self._uttr_id = uttr_id
+        self._edges = edges
+
+    @property
+    def edges(self):
+        return iter(self._edges)
+
+    @property
+    def start_time(self):
+        return self._start
+
+    @property
+    def end_time(self):
+        return self._end
+
+    @property
+    def channel(self):
+        return self._channel
+
+    @property
+    def uttr_id(self):
+        return self._uttr_id
+
+    def __iter__(self):
+        return self.edges
+
+    def __eq__(self, other):
+        if type(other) != type(self):
+            return False
+        this_tuple = (self._start,
+                      self._end,
+                      self._channel,
+                      self._uttr_id,
+                      self._edges)
+
+        other_tuple = (other._start,
+                       other._end,
+                       other._channel,
+                       other._uttr_id,
+                       other._edges)
+
+        return this_tuple == other_tuple
+
+    def __repr__(self):
+        return 'CnetUtterance({0}, {1}, {2}, channel={3}, uttr_id={4})'.format(
+            self._start, self._end, self._edges, self._channel, self._uttr_id
+        )
+
+
+class CnetOld(object):
     def __init__(self, use_channel):
         self.words = defaultdict(lambda: defaultdict(list))
-        self.start_times = defaultdict(list)
+        self.start_times = defaultdict(float)
         self.speech_duration = 0
         self.last_node_id = None
         self.use_channel = use_channel
@@ -105,7 +183,7 @@ class Cnet(object):
         if match:
             node_id = int(match.group(1))
             if node_id is 0:
-                self.start_times = defaultdict()
+                self.start_times = defaultdict(float)
             self.start_times[node_id] = float(match.group(2))
             return True
         return False

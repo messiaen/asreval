@@ -14,7 +14,7 @@ import re
 import sys
 from collections import defaultdict
 from asreval import Stm
-from asreval import Cnet
+from asreval import CnetOld
 
 
 class MAP(object):
@@ -30,6 +30,7 @@ class MAP(object):
         word_ap = {}  # map of words to their average precisions
         ap_sum = 0  # sum of average precisions calculated
         num_aps = 0  # number of average precisions calculated
+        #print(self.hypothesis.words)
 
         for word in self.word_list:
 
@@ -39,6 +40,7 @@ class MAP(object):
             self.total_possible_hits += num_true
 
             hyp_list = self.hypothesis.get(word)
+            #print(hyp_list)
             if hyp_list:
                 self.ref.check_truth(word, hyp_list)
                 sorted_hyps = self.hypothesis.get_best_sorted(word)
@@ -140,7 +142,7 @@ def load_word_list(word_list_file):
 
 
 def load_cnets(cnet_list, use_channel):
-    hypothesis = Cnet(use_channel)
+    hypothesis = CnetOld(use_channel)
 
     with  open(cnet_list, 'r') as file:
         for cnet_file in file:
