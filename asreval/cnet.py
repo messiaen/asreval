@@ -79,12 +79,12 @@ class Cnet(object):
             return True
         return False
 
-    utt_re = re.compile('UTTERANCE=((.*)-\d+)')
+    utt_re = re.compile('UTTERANCE=(.*)')
 
     def __match_utterance(self, line):
         match = self.utt_re.match(line)
         if match:
-            self.audio_id = match.group(2)
+            self.audio_id = match.group(1)
             return True
         return False
 
@@ -98,7 +98,7 @@ class Cnet(object):
             return True
         return False
 
-    node_re = re.compile('I=(\d+) t=(\d+.\d+)')
+    node_re = re.compile('I=(\S+)\s+t=(\S+)')
 
     def __match_node(self, line):
         match = self.node_re.match(line)
@@ -110,7 +110,7 @@ class Cnet(object):
             return True
         return False
 
-    edge_re = re.compile('J=\d+\s+S=(\d+)\s+E=(\d+)\s+W=(.*)\s+v=\d+\s+a=\d+\s+l=\d+\s+s=(-?\d+\.\d+)')
+    edge_re = re.compile('J=\S+\s+S=(\S+)\s+E=(\S+)\s+W=(.*)\s+v=\S+\s+a=\S+\s+l=\S+\s+s=(\S+)')
 
     def __match_edge(self, line):
         match = self.edge_re.match(line)
