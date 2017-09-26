@@ -1,9 +1,14 @@
 from collections import Counter
 from collections import namedtuple
-from asreval.cnet import LabeledCnetEdge
+
+from asreval.cnet import LabeledSlfEdge
 
 
-KwsMapResults = namedtuple('KwsMapResults', ['map',
+__all__ = ['KwsMapResults',
+           'kws_mean_ave_precision']
+
+
+KwsMapResults = namedtuple('KwsMapResults', ['mean_ave_precision',
                                              'word_ap',
                                              'total_tp',
                                              'total_fp',
@@ -52,7 +57,7 @@ def kws_mean_ave_precision(word_list, hypothesis, ref, min_match_ratio=0.5):
                                   key=lambda l_arc: l_arc.score,
                                   reverse=True)
 
-        ap, ctp, cfp = word_average_precision(sorted_best_arcs,
+        ap, ctp, cfp = word_ave_precision(sorted_best_arcs,
                                               true_count)
 
         sum_ap += ap
@@ -72,41 +77,44 @@ def kws_mean_ave_precision(word_list, hypothesis, ref, min_match_ratio=0.5):
                          no_time_match_counts)
 
 
-def word_average_precision(labeled_arcs, num_true):
-    total = 0.0  # sum of precisions for each occurrence of a word
-    ctp = 0.0  # cumulative true positives (with higher confidence)
-    cfp = 0.0  # cumulative false positives (with higher confidence)
+def word_ave_precision(labeled_arcs, num_true):
+    rank_n_tp = 0.0
+    rank_n_fp = 0.0
 
-    i = 0
-    while i < len(labeled_arcs):
-        arc, _, correct = labeled_arcs[i]
+    word_ap = 0.0
+
+    for tp, fp in _tied_tp_fp(labeled_arcs):
+        if tp > 0:
+            for j in range(1, int(tp) + 1):
+                word_ap += ((rank_n_tp + j)
+                            / (rank_n_tp + j + rank_n_fp + fp / tp * j))
+        rank_n_tp += tp
+        rank_n_fp += fp
+
+    return word_ap / num_true, rank_n_tp, rank_n_fp
+
+
+def _tied_tp_fp(sorted_labeled_arcs):
+    arc_iter = iter(sorted_labeled_arcs)
+    arc, _, matches_word = next(arc_iter)
+
+    while True:
+        tp = 0.0
+        fp = 0.0
         score = arc.score
 
-        tp = 0.0  # true positives with current confidence
-        fp = 0.0  # false positives with current confidence
+        try:
+            while score == arc.score:
+                if matches_word:
+                    tp += 1
+                else:
+                    fp += 1
+                arc, _, matches_word = next(arc_iter)
+        except StopIteration as e:
+            yield tp, fp
+            raise e
 
-        # Tie Breaking: when we have true positives and false positives
-        # with the same confidence, we want to deterministically evenly
-        # distribute them throughout the range of occurrences with the
-        # same confidence
-        while score == arc.score:
-            if correct:
-                tp += 1
-            else:
-                fp += 1
-
-            i += 1
-            if i >= len(labeled_arcs):
-                break
-            arc, _, correct = labeled_arcs[i]
-
-        if tp:
-            for x in range(1, int(tp) + 1):
-                total += (ctp + x) / (ctp + x + cfp + fp / tp * x)
-        ctp += tp
-        cfp += fp
-
-    return total / num_true, ctp, cfp
+        yield tp, fp
 
 
 def select_best_arc(labeled_arcs):
@@ -167,4 +175,4 @@ def labeled_arc_matches(arcs, audio_id, channel, ref, min_match_ratio=0.5):
                     max_ratio = time_match_ratio
                     has_time_match = True
                     has_word_match = arc.word in ref_uttr
-            yield LabeledCnetEdge(arc, has_time_match, has_word_match)
+            yield LabeledSlfEdge(arc, has_time_match, has_word_match)

@@ -14,19 +14,26 @@ from collections import defaultdict
 from collections import namedtuple
 
 
-CnetEdge = namedtuple('CnetEdge', ['start_node',
+__all__ = ['SlfEdge',
+           'LabeledSlfEdge',
+           'SlfUtterance',
+           'SlfIndex']
+
+
+SlfEdge = namedtuple('CnetEdge', ['start_node',
                                    'end_node',
                                    'start_time',
                                    'end_time',
                                    'word',
                                    'score'])
 
-__LabeledCnetEdge = namedtuple('LabeledCnetEdge', ['arc',
+
+__LabeledSlfEdge = namedtuple('LabeledCnetEdge', ['arc',
                                                    'matches_time',
                                                    'matches_word'])
 
 
-class LabeledCnetEdge(__LabeledCnetEdge):
+class LabeledSlfEdge(__LabeledSlfEdge):
     @property
     def score(self):
         return self.arc.score
@@ -60,7 +67,7 @@ class LabeledCnetEdge(__LabeledCnetEdge):
         return this_tuple == other_tuple
 
 
-class CnetIndex(object):
+class SlfIndex(object):
     def __init__(self, utterances):
         self._words = defaultdict(list)
         for uttr in utterances:
@@ -80,7 +87,7 @@ class CnetIndex(object):
         return []
 
 
-class CnetUtterance(object):
+class SlfUtterance(object):
     def __init__(self, start, end, edges, channel=None, audio_id=None):
         self._start = float(start)
         self._end = float(end)
@@ -211,7 +218,7 @@ class CnetOld(object):
                 self.utterance.end = self.start_times[self.last_node_id]
 
             if has_uttr:
-                self.new_utterances.append(CnetUtterance(
+                self.new_utterances.append(SlfUtterance(
                     self.start_times[self.last_node_id],
                     self.start_times[0],
                     self.new_edges,
@@ -283,7 +290,7 @@ class CnetOld(object):
                             False,
                             False)
 
-            self.new_edges.append(CnetEdge(
+            self.new_edges.append(SlfEdge(
                 start_node_id,
                 end_node_id,
                 self.start_times[start_node_id],

@@ -13,6 +13,10 @@ from collections import defaultdict
 from collections import OrderedDict
 
 
+__all__ = ['Stm',
+           'StmUtterance']
+
+
 class Stm(object):
     def __init__(self, utterances):
         self._uttrs = defaultdict(lambda: defaultdict(list))

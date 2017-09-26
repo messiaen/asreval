@@ -2,8 +2,8 @@ import re
 
 from contextlib import suppress
 
-from asreval.cnet import CnetEdge
-from asreval.cnet import CnetUtterance
+from asreval.cnet import SlfEdge
+from asreval.cnet import SlfUtterance
 from asreval.stm import StmUtterance
 
 cnet_uttr_re = re.compile('UTTERANCE=(.*)')
@@ -83,17 +83,17 @@ def parse_cnet_utterance(lines, channel=None):
             if word == '-' or '<' in word:
                 continue
 
-            edges.append(CnetEdge(start_node_id,
-                                  end_node_id,
-                                  start_times[start_node_id],
-                                  start_times[end_node_id],
-                                  word,
-                                  score))
+            edges.append(SlfEdge(start_node_id,
+                                 end_node_id,
+                                 start_times[start_node_id],
+                                 start_times[end_node_id],
+                                 word,
+                                 score))
 
             if edge_id == last_edge_id:
-                return CnetUtterance(start_times[0],
-                                     start_times[last_node_id],
-                                     edges,
-                                     audio_id=audio_id,
-                                     channel=channel)
+                return SlfUtterance(start_times[0],
+                                    start_times[last_node_id],
+                                    edges,
+                                    audio_id=audio_id,
+                                    channel=channel)
 
