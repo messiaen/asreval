@@ -26,6 +26,11 @@ class Stm(object):
         # explicitly check for keys so that default dict won't grow
         if audio_id not in self._uttrs:
             return []
+        if channel is None:
+            uttrs = []
+            for c, c_uttrs in self._uttrs[audio_id].items():
+                uttrs.extend(c_uttrs)
+            return uttrs
         if channel not in self._uttrs[audio_id]:
             return []
         return self._uttrs[audio_id][channel]
