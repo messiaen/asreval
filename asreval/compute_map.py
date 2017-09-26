@@ -1,6 +1,7 @@
 import os
 import re
 import argparse
+import gzip
 
 from asreval.slf import SlfIndex
 from asreval.parse import parse_cnet_utterances
@@ -69,9 +70,15 @@ def load_cnets(cnet_list, use_channel):
     def uttrs():
         with open(cnet_list, 'r', encoding='utf-8') as f:
             for fn in filter(lambda l: len(l) > 0, map(str.strip, f)):
-                channel = extract_channel(fn, use_channel)
-                with open(fn, 'r', encoding='utf=8') as lines:
-                    yield from parse_cnet_utterances(lines, channel=channel)
+                chn = extract_channel(fn, use_channel)
+                if fn.endswith('.lat'):
+                    with open(fn, 'r', encoding='utf-8') as lines:
+                        yield from parse_cnet_utterances(lines, channel=chn)
+                elif fn.endswith('.gz'):
+                    with gzip.open(fn, 'rt', encoding='utf-8') as lines:
+                        yield from parse_cnet_utterances(lines, channel=chn)
+                else:
+                    raise Exception('Unrecognized file format {}'.format(fn))
     return SlfIndex(uttrs())
 
 
