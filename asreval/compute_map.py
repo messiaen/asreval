@@ -2,7 +2,7 @@ import os
 import re
 import argparse
 
-from asreval.cnet import SlfIndex
+from asreval.slf import SlfIndex
 from asreval.parse import parse_cnet_utterances
 from asreval.parse import parse_stm_utterances
 from asreval.stm import Stm

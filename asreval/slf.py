@@ -9,16 +9,16 @@ __all__ = ['SlfEdge',
 
 
 SlfEdge = namedtuple('CnetEdge', ['start_node',
-                                   'end_node',
-                                   'start_time',
-                                   'end_time',
-                                   'word',
-                                   'score'])
+                                  'end_node',
+                                  'start_time',
+                                  'end_time',
+                                  'word',
+                                  'score'])
 
 
 __LabeledSlfEdge = namedtuple('LabeledCnetEdge', ['arc',
-                                                   'matches_time',
-                                                   'matches_word'])
+                                                  'matches_time',
+                                                  'matches_word'])
 
 
 class LabeledSlfEdge(__LabeledSlfEdge):
@@ -47,7 +47,8 @@ class LabeledSlfEdge(__LabeledSlfEdge):
         return self.arc.word
 
     def __hash__(self):
-        return super().__hash__() + 39 * hash((self.arc, self.matches_time, self.matches_word))
+        return super().__hash__() + 39 * hash(
+            (self.arc, self.matches_time, self.matches_word))
 
     def __eq__(self, other):
         this_tuple = (self.arc, self.matches_time, self.matches_word)
@@ -128,12 +129,17 @@ class SlfUtterance(object):
         return this_tuple == other_tuple
 
     def __hash__(self):
-        return hash((self.audio_id, self.channel, self.start_time, self.end_time))
+        return hash(
+            (self.audio_id, self.channel, self.start_time, self.end_time))
 
     def __repr__(self):
         edge_lst = []
         for w, edges in self._edges.items():
             edge_lst.extend(edges)
-        return 'CnetUtterance({0}, {1}, {2}, channel={3}, uttr_id={4})'.format(
-            self._start, self._end, tuple(set(edge_lst)), self._channel, self._audio_id
+        return 'SlfUtterance({0}, {1}, {2}, channel={3}, uttr_id={4})'.format(
+            repr(self._start),
+            repr(self._end),
+            repr(tuple(set(edge_lst))),
+            repr(self._channel),
+            repr(self._audio_id)
         )

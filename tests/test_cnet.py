@@ -1,9 +1,9 @@
 import collections
 
-from asreval.cnet import SlfEdge
-from asreval.cnet import LabeledSlfEdge
-from asreval.cnet import SlfIndex
-from asreval.cnet import SlfUtterance
+from asreval.slf import SlfEdge
+from asreval.slf import LabeledSlfEdge
+from asreval.slf import SlfIndex
+from asreval.slf import SlfUtterance
 
 
 def test_CnetUtterance_init():

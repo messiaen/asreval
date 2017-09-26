@@ -2,8 +2,8 @@ import re
 
 from contextlib import suppress
 
-from asreval.cnet import SlfEdge
-from asreval.cnet import SlfUtterance
+from asreval.slf import SlfEdge
+from asreval.slf import SlfUtterance
 from asreval.stm import StmUtterance
 
 

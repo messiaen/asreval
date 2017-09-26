@@ -1,7 +1,7 @@
 from collections import Counter
 from collections import namedtuple
 
-from asreval.cnet import LabeledSlfEdge
+from asreval.slf import LabeledSlfEdge
 
 
 __all__ = ['KwsMapResults',
