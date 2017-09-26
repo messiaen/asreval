@@ -8,8 +8,11 @@ from asreval.stm import StmUtterance
 
 
 __all__ = ['parse_stm_utterances',
-           'parse_cnet_utterances',
-           'parse_cnet_utterance']
+           'parse_cnet_utterances']
+
+# TODO this parses some subset / extension of standard slf and stm files
+# Refactor to handle standard slf and stms files.  Allow users to pass in
+# special processing functions like ext_audio_id (see compute_map.py).
 
 cnet_uttr_re = re.compile('UTTERANCE=(.*)')
 cnet_uttr_info_re = re.compile('N=(\d+)\s+L=(\d+)')
@@ -19,11 +22,13 @@ cnet_edge_re = re.compile(
 
 
 stm_uttr_re = re.compile(
-    '^(.*)\s+(.*)\s+.*\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+<.*>\s+(.*)$')
+    '^(.*)\s+(.*)\s+.*\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+<.*>\s+(.*)')
 
 
 def parse_stm_utterances(lines):
-    for line in filter(lambda l: len(l) > 0, map(str.strip, lines)):
+    for line in filter(lambda l: len(l) > 0, lines):
+        if line.startswith(';;'):
+            continue
         m = stm_uttr_re.match(line)
         if m:
             audio_id = m.group(1)
@@ -46,13 +51,14 @@ def lines_from_file_list(file_names):
             yield from f
 
 
-def parse_cnet_utterances(lines, channel=None):
+def parse_cnet_utterances(lines, channel=None, ext_audio_id_fn=None):
     with suppress(StopIteration):
         while True:
-            yield parse_cnet_utterance(lines, channel=channel)
+            yield _parse_cnet_utterance(
+                lines, channel=channel, ext_audio_id_fn=ext_audio_id_fn)
 
 
-def parse_cnet_utterance(lines, channel=None):
+def _parse_cnet_utterance(lines, channel=None, ext_audio_id_fn=None):
     start_times = {}
     last_node_id = None
     last_edge_id = None
@@ -66,7 +72,10 @@ def parse_cnet_utterance(lines, channel=None):
 
         match_uttr = cnet_uttr_re.match(line)
         if match_uttr:
-            audio_id = str(match_uttr.group(1))
+            if not ext_audio_id_fn:
+                audio_id = str(match_uttr.group(1))
+            else:
+                audio_id = ext_audio_id_fn(line)
 
         match_uttr_info = cnet_uttr_info_re.match(line)
         if match_uttr_info:
@@ -85,15 +94,13 @@ def parse_cnet_utterance(lines, channel=None):
             word = str(match_edge.group(4))
             score = float(match_edge.group(5))
 
-            if word == '-' or '<' in word:
-                continue
-
-            edges.append(SlfEdge(start_node_id,
-                                 end_node_id,
-                                 start_times[start_node_id],
-                                 start_times[end_node_id],
-                                 word,
-                                 score))
+            if word != '-' and '<' not in word:
+                edges.append(SlfEdge(start_node_id,
+                                     end_node_id,
+                                     start_times[start_node_id],
+                                     start_times[end_node_id],
+                                     word,
+                                     score))
 
             if edge_id == last_edge_id:
                 return SlfUtterance(start_times[0],

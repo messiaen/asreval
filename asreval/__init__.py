@@ -1,5 +1,4 @@
 from asreval.parse import parse_cnet_utterances
-from asreval.parse import parse_cnet_utterance
 from asreval.parse import parse_stm_utterances
 
 from asreval.slf import SlfEdge

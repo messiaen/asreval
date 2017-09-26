@@ -30,8 +30,6 @@ def test_kws_map():
     assert len(cnet_uttrs) == 24
     assert len(word_list) == 196
 
-    # new_uttrs = set(cnet.to_new_uttrs())
-
     cnetIndex = SlfIndex(cnet_uttrs)
 
     results = kws_mean_ave_precision(word_list, cnetIndex, stmRef)

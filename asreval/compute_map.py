@@ -22,6 +22,16 @@ xml_line_re = re.compile('\s*<term termid="(.*)"><termtext>(.*)</termtext>.*')
 dict_line_re = re.compile('>(\S+)\s')
 
 
+cnet_uttr_re = re.compile('UTTERANCE=((.*)-\d+)')
+
+
+def ext_audio_id(s):
+    m = cnet_uttr_re.match(s)
+    if m:
+        return m.group(2)
+    return s
+
+
 def load_word_list(word_list_file):
     word_list = set()
 
@@ -71,14 +81,14 @@ def load_cnets(cnet_list, use_channel):
         with open(cnet_list, 'r', encoding='utf-8') as f:
             for fn in filter(lambda l: len(l) > 0, map(str.strip, f)):
                 chn = extract_channel(fn, use_channel)
-                if fn.endswith('.lat'):
-                    with open(fn, 'r', encoding='utf-8') as lines:
-                        yield from parse_cnet_utterances(lines, channel=chn)
-                elif fn.endswith('.gz'):
+                if fn.endswith('.gz'):
                     with gzip.open(fn, 'rt', encoding='utf-8') as lines:
-                        yield from parse_cnet_utterances(lines, channel=chn)
+                        yield from parse_cnet_utterances(
+                            lines, channel=chn, ext_audio_id_fn=ext_audio_id)
                 else:
-                    raise Exception('Unrecognized file format {}'.format(fn))
+                    with open(fn, 'r', encoding='utf-8') as lines:
+                        yield from parse_cnet_utterances(
+                            lines, channel=chn, ext_audio_id_fn=ext_audio_id)
     return SlfIndex(uttrs())
 
 
@@ -143,7 +153,8 @@ def main():
     word_ap = results.word_ap
 
     print("\n")
-    print("Total speech duration (seconds): {}".format(slf.speech_dur))
+    print("Total speech duration (seconds): {}".format(
+        round(slf.speech_dur)))
     print("Total number of terms: {}".format(len(term_list)))
     print("Total possible hits: {}".format(results.total_possible_hits))
     print("Total true positives: {}".format(int(results.total_tp)))
