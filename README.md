@@ -13,11 +13,11 @@ $ python setup.py install
 ### compute_map
 
 ```
-$ compute_map --help
+$ asreval-kwsmap --help
 
-usage: compute_map [-h] [--term-list TERM_LIST] --cnet-list CNET_LIST --stm
-                   STM [--ave-precision-by-term]
-                   [--use-channel {file,directory}]
+usage: asreval-kwsmap [-h] [--term-list TERM_LIST] --cnet-list CNET_LIST --stm
+                      STM [--ave-precision-by-term]
+                      [--use-channel {file,directory}]
 
 Compute Mean Average Precision for KWS
 
