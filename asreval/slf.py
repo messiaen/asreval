@@ -58,10 +58,16 @@ class LabeledSlfEdge(__LabeledSlfEdge):
 
 class SlfIndex(object):
     def __init__(self, utterances):
+        self._speech_dur = 0.0
         self._words = defaultdict(list)
         for uttr in utterances:
+            self._speech_dur += uttr.end_time - uttr.start_time
             for w, edges in uttr:
                 self._words[w].append(uttr)
+
+    @property
+    def speech_dur(self):
+        return self._speech_dur
 
     @property
     def words(self):

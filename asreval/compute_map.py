@@ -136,7 +136,7 @@ def main():
     word_ap = results.word_ap
 
     print("\n")
-    #print("Total speech duration (seconds): {}".format(cnet.speech_duration))
+    print("Total speech duration (seconds): {}".format(slf.speech_dur))
     print("Total number of terms: {}".format(len(term_list)))
     print("Total possible hits: {}".format(results.total_possible_hits))
     print("Total true positives: {}".format(int(results.total_tp)))
