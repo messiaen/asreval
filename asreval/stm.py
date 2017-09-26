@@ -10,17 +10,122 @@ import re
 import gzip
 from collections import Counter
 from collections import defaultdict
+from collections import OrderedDict
 
 
 class Stm(object):
+    def __init__(self, utterances):
+        self._uttrs = defaultdict(lambda: defaultdict(list))
+        self._uttr_counts = Counter()
+        for uttr in utterances:
+            self._uttrs[uttr.audio_id][uttr.channel].append(uttr)
+            self._uttr_counts.update(set(uttr.words))
+
+    @property
+    def word_list(self):
+        return set(self._uttr_counts)
+
+    def uttr_count(self, word):
+        return self._uttr_counts[word]
+
+    def uttrs(self, audio_id, channel):
+        # explicitly check for keys so that default dict won't grow
+        if audio_id not in self._uttrs:
+            return []
+        if channel not in self._uttrs[audio_id]:
+            return []
+        return self._uttrs[audio_id][channel]
+
+
+class StmUtterance(object):
+    def __init__(self, start, end, words, channel=None, audio_id=None):
+        self._words = OrderedDict()
+        for w in words:
+            self._words[w] = None
+
+        self._audio_id = audio_id
+        self._start_time = start
+        self._end_time = end
+        self._channel = channel
+
+    @property
+    def words(self):
+        return list(self._words)
+
+    @property
+    def start_time(self):
+        return self._start_time
+
+    @property
+    def end_time(self):
+        return self._end_time
+
+    @property
+    def audio_id(self):
+        return self._audio_id
+
+    @property
+    def channel(self):
+        return self._channel
+
+    def __contains__(self, word):
+        return word in self._words
+
+    def __repr__(self):
+        return 'StmUtterance({0}, {1}, {2}, audio_id={3}, channel={4})'.format(
+            repr(self.start_time),
+            repr(self.end_time),
+            repr(self.words),
+            repr(self.audio_id),
+            repr(self.channel))
+
+    def __str__(self):
+        return repr(self)
+
+    def __hash__(self):
+        return hash((self.start_time,
+                     self.end_time,
+                     self.words,
+                     self.audio_id,
+                     self.channel))
+
+    def __eq__(self, o):
+        this_tuple = (self.start_time,
+                      self.end_time,
+                      self.words,
+                      self.audio_id,
+                      self.channel)
+        other_tuple = (self.start_time,
+                       self.end_time,
+                       self.words,
+                       self.audio_id,
+                       self.channel)
+        return this_tuple == other_tuple
+
+    # TODO clean up
+    def time_match_ratio(self, start, stop):
+        duration = float(stop - start)
+        # If the duration is 0.0 then either the start time is in this uttr
+        # or not
+        if duration == 0.0:
+            return 1.0 if self._start_time <= start < self._end_time else 0.0
+            # return 0.0
+        return (duration - min(duration, max(0, self._start_time - start))
+                - min(duration, max(0, stop - self._end_time))) / duration
+
+
+class StmOld(object):
     def __init__(self):
         self.utts = defaultdict(lambda: defaultdict(list))
         self.not_found = Counter()
         self.utt_count = Counter()
         self.word_list = []  # list of words in STM
 
+        self.new_uttrs = []
+        self.num_uttrs = 0
+
     utt_re = re.compile(
-        '(.*)\s+(.*)\s+.*\s+(\d+.\d+)\s+(\d+.\d+)\s+<.*>\s+(.*)')
+        '(.*)\s+(.*)\s+.*\s+(\S+)\s+(\S+)\s+<.*>\s+(.*)')
 
     def load(self, filename):
 
@@ -35,6 +140,7 @@ class Stm(object):
         for line in fin:
             match = self.utt_re.match(line)
             if match:
+                self.num_uttrs += 1
                 audio_id = match.group(1)
                 channel = match.group(2)
                 start = float(match.group(3))
@@ -49,6 +155,10 @@ class Stm(object):
 
                 self.__add_to_utt_count(words)
                 self.__add_to_utts(audio_id, channel, start, end, utt_words)
+
+                self.new_uttrs.append(StmUtterance(start, end, words, channel=channel, audio_id=audio_id))
+            else:
+                print(line)
 
     def __add_to_utt_count(self, words):
         # Use a set so you only count a word once per utterance
@@ -124,7 +234,8 @@ class Utterance(object):
         duration = float(hypothesis_end - hypothesis_start)
         # for zero length edge there's nothing to be in
         if duration == 0.0:
-            return 0.0
+            return 1.0 if self.start <= hypothesis_start < self.end else 0.0
+            # return 0.0
         return (duration - min(duration, max(0, self.start - hypothesis_start))
                 - min(duration, max(0, hypothesis_end - self.end))) / duration
 

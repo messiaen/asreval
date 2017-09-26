@@ -6,4 +6,4 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *
 from asreval.cnet import CnetOld
-from asreval.stm import Stm
+from asreval.stm import StmOld
