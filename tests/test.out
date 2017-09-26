@@ -1,0 +1,13 @@
+[CnetEdge(start_node=0, end_node=5, start_time=0.0, end_time=0.55, word='THE', score=4.5302e-09),
+CnetEdge(start_node=15, end_node=21, start_time=1.27, end_time=1.53, word='THE', score=3.65025e-07),
+CnetEdge(start_node=18, end_node=21, start_time=1.35, end_time=1.53, word='THE', score=8.20543e-07),
+CnetEdge(start_node=20, end_node=21, start_time=1.27, end_time=1.53, word='THE', score=3.65025e-07),
+CnetEdge(start_node=23, end_node=26, start_time=2.74, end_time=2.86, word='THE', score=3.18141e-05),
+CnetEdge(start_node=24, end_node=26, start_time=2.77, end_time=2.86, word='THE', score=6.80621e-05),
+CnetEdge(start_node=25, end_node=26, start_time=2.76, end_time=2.86, word='THE', score=5.83629e-05),
+CnetEdge(start_node=28, end_node=33, start_time=2.8, end_time=2.86, word='THE', score=0.000249758),
+CnetEdge(start_node=29, end_node=33, start_time=2.79, end_time=2.86, word='THE', score=0.000312958),
+CnetEdge(start_node=30, end_node=33, start_time=2.78, end_time=2.86, word='THE', score=0.00026477),
+CnetEdge(start_node=31, end_node=33, start_time=2.78, end_time=2.86, word='THE', score=0.000286845),
+CnetEdge(start_node=32, end_node=33, start_time=2.78, end_time=2.86, word='THE', score=0.000320936),
+]

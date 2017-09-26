@@ -1,6 +1,5 @@
 import os
 
-from asreval.compute_map import load_stm
 from asreval.cnet import SlfIndex
 from asreval.stm import Stm
 from asreval.mean_average_precision import kws_mean_ave_precision
@@ -36,7 +35,7 @@ def test_kws_map():
     cnetIndex = SlfIndex(cnet_uttrs)
 
     results = kws_mean_ave_precision(word_list, cnetIndex, stmRef)
-    assert results.true_total_hits == 286
+    assert results.total_possible_hits == 286
     assert results.total_tp == 278
     assert results.total_fp == 119
     assert sum(results.no_time_match_counts.values()) == 1
@@ -98,7 +97,8 @@ def test_labeled_arc_matches():
                        LabeledSlfEdge(SlfEdge(start_node=71, end_node=72, start_time=5.53, end_time=5.98, word='THE', score=2.15655e-06), matches_time=True, matches_word=True)]
 
     test_stm_filename = os.path.join(os.path.dirname(__file__), '3test.stm')
-    stmRef = Stm(load_stm(test_stm_filename).new_uttrs)
+    with open(test_stm_filename, 'r') as f:
+        stmRef = Stm(parse_stm_utterances(f))
 
     labeled_arcs = list(labeled_arc_matches(arcs, '260-123286-0026', 'A', stmRef, 0.5))
 

@@ -6,6 +6,11 @@ from asreval.cnet import SlfEdge
 from asreval.cnet import SlfUtterance
 from asreval.stm import StmUtterance
 
+
+__all__ = ['parse_stm_utterances',
+           'parse_cnet_utterances',
+           'parse_cnet_utterance']
+
 cnet_uttr_re = re.compile('UTTERANCE=(.*)')
 cnet_uttr_info_re = re.compile('N=(\d+)\s+L=(\d+)')
 cnet_node_re = re.compile('I=(\S+)\s+t=(\S+)')

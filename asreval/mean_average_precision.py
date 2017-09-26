@@ -12,13 +12,13 @@ KwsMapResults = namedtuple('KwsMapResults', ['mean_ave_precision',
                                              'word_ap',
                                              'total_tp',
                                              'total_fp',
-                                             'true_total_hits',
+                                             'total_possible_hits',
                                              'arc_counts',
                                              'no_time_match_counts'])
 
 
 def kws_mean_ave_precision(word_list, hypothesis, ref, min_match_ratio=0.5):
-    true_count_total = 0
+    total_possible_hits = 0
     no_time_match_counts = Counter()
     arc_counts = Counter()
     total_tp = 0
@@ -31,7 +31,7 @@ def kws_mean_ave_precision(word_list, hypothesis, ref, min_match_ratio=0.5):
         true_count = ref.uttr_count(query_word)
         if true_count < 1:
             continue
-        true_count_total += true_count
+        total_possible_hits += true_count
 
         matching_uttrs = hypothesis[query_word]
         if len(matching_uttrs) < 1:
@@ -57,8 +57,7 @@ def kws_mean_ave_precision(word_list, hypothesis, ref, min_match_ratio=0.5):
                                   key=lambda l_arc: l_arc.score,
                                   reverse=True)
 
-        ap, ctp, cfp = word_ave_precision(sorted_best_arcs,
-                                              true_count)
+        ap, ctp, cfp = word_ave_precision(sorted_best_arcs, true_count)
 
         sum_ap += ap
         word_ap[query_word] = ap
@@ -72,7 +71,7 @@ def kws_mean_ave_precision(word_list, hypothesis, ref, min_match_ratio=0.5):
                          word_ap,
                          total_tp,
                          total_fp,
-                         true_count_total,
+                         total_possible_hits,
                          arc_counts,
                          no_time_match_counts)
 
