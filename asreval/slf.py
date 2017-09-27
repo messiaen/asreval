@@ -1,3 +1,13 @@
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from builtins import super
+from builtins import str
+from future import standard_library
+from future.utils import viewitems
+
+standard_library.install_aliases()
 from collections import defaultdict
 from collections import namedtuple
 
@@ -8,7 +18,7 @@ __all__ = ['SlfEdge',
            'SlfIndex']
 
 
-SlfEdge = namedtuple('CnetEdge', ['start_node',
+SlfEdge = namedtuple('SlfEdge', ['start_node',
                                   'end_node',
                                   'start_time',
                                   'end_time',
@@ -16,7 +26,7 @@ SlfEdge = namedtuple('CnetEdge', ['start_node',
                                   'score'])
 
 
-__LabeledSlfEdge = namedtuple('LabeledCnetEdge', ['arc',
+__LabeledSlfEdge = namedtuple('LabeledSlfEdge', ['arc',
                                                   'matches_time',
                                                   'matches_word'])
 
@@ -109,7 +119,7 @@ class SlfUtterance(object):
         return self._audio_id
 
     def __iter__(self):
-        return iter(self._edges.items())
+        return iter(viewitems(self._edges))
 
     def __getitem__(self, item):
         if not isinstance(item, str):
@@ -140,7 +150,7 @@ class SlfUtterance(object):
 
     def __repr__(self):
         edge_lst = []
-        for w, edges in self._edges.items():
+        for w, edges in viewitems(self._edges):
             edge_lst.extend(edges)
         return 'SlfUtterance({0}, {1}, {2}, channel={3}, uttr_id={4})'.format(
             repr(self._start),

@@ -11,6 +11,7 @@ setup(
         'Environment :: Console',
         'Intended Audience :: Science/Research',
         'Operating System :: POSIX :: Linux',
+        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: Implementation :: CPython',
         'Topic :: Software Development',
@@ -24,6 +25,7 @@ setup(
     ],
     tests_require=['pytest'],
     setup_requires=['pytest-runner'],
+    install_requires=['future'],
     entry_points={
         'console_scripts': [
             'asreval-kwsmap = asreval.compute_map:main',

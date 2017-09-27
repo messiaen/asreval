@@ -1,6 +1,15 @@
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from builtins import filter
+from builtins import next
+from builtins import open
+from builtins import int
+from builtins import str
+from future import standard_library
+standard_library.install_aliases()
 import re
-
-from contextlib import suppress
 
 from asreval.slf import SlfEdge
 from asreval.slf import SlfUtterance
@@ -48,14 +57,14 @@ def parse_stm_utterances(lines):
 def lines_from_file_list(file_names):
     for fn in file_names:
         with open(fn, 'r') as f:
-            yield from f
+            for l in f:
+                yield l
 
 
 def parse_cnet_utterances(lines, channel=None, ext_audio_id_fn=None):
-    with suppress(StopIteration):
-        while True:
-            yield _parse_cnet_utterance(
-                lines, channel=channel, ext_audio_id_fn=ext_audio_id_fn)
+    while True:
+        yield _parse_cnet_utterance(
+            lines, channel=channel, ext_audio_id_fn=ext_audio_id_fn)
 
 
 def _parse_cnet_utterance(lines, channel=None, ext_audio_id_fn=None):

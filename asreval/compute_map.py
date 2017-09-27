@@ -1,3 +1,15 @@
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from builtins import int
+from builtins import round
+from builtins import filter
+from builtins import map
+from builtins import open
+from builtins import str
+from future import standard_library
+standard_library.install_aliases()
 import os
 import re
 import argparse
@@ -83,12 +95,18 @@ def load_cnets(cnet_list, use_channel):
                 chn = extract_channel(fn, use_channel)
                 if fn.endswith('.gz'):
                     with gzip.open(fn, 'rt', encoding='utf-8') as lines:
-                        yield from parse_cnet_utterances(
-                            lines, channel=chn, ext_audio_id_fn=ext_audio_id)
+                        for u in parse_cnet_utterances(
+                                lines,
+                                channel=chn,
+                                ext_audio_id_fn=ext_audio_id):
+                            yield u
                 else:
                     with open(fn, 'r', encoding='utf-8') as lines:
-                        yield from parse_cnet_utterances(
-                            lines, channel=chn, ext_audio_id_fn=ext_audio_id)
+                        for u in parse_cnet_utterances(
+                                lines,
+                                channel=chn,
+                                ext_audio_id_fn=ext_audio_id):
+                            yield u
     return SlfIndex(uttrs())
 
 

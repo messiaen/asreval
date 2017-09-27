@@ -1,3 +1,10 @@
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import absolute_import
+from future.utils import viewitems
+from future import standard_library
+standard_library.install_aliases()
 from collections import Counter
 from collections import defaultdict
 from collections import OrderedDict
@@ -28,7 +35,7 @@ class Stm(object):
             return []
         if channel is None:
             uttrs = []
-            for c, c_uttrs in self._uttrs[audio_id].items():
+            for c, c_uttrs in viewitems(self._uttrs[audio_id]):
                 uttrs.extend(c_uttrs)
             return uttrs
         if channel not in self._uttrs[audio_id]:
