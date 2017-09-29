@@ -14,6 +14,8 @@ import os
 import re
 import argparse
 import gzip
+import sys
+import six
 
 from asreval.slf import SlfIndex
 from asreval.parse import parse_cnet_utterances
@@ -22,6 +24,13 @@ from asreval.stm import Stm
 from asreval.mean_average_precision import kws_mean_ave_precision
 
 from collections import defaultdict
+
+
+gzip_open = gzip.open
+if six.PY2:
+    def py2_gzip_open(fn, mode, encoding='utf=8'):
+        return gzip.open(fn, mode)
+    gzip_open = py2_gzip_open
 
 
 def load_stm(truth_file):
@@ -94,7 +103,7 @@ def load_cnets(cnet_list, use_channel):
             for fn in filter(lambda l: len(l) > 0, map(str.strip, f)):
                 chn = extract_channel(fn, use_channel)
                 if fn.endswith('.gz'):
-                    with gzip.open(fn, 'rt', encoding='utf-8') as lines:
+                    with gzip_open(fn, 'rt', encoding='utf-8') as lines:
                         for u in parse_cnet_utterances(
                                 lines,
                                 channel=chn,
@@ -110,7 +119,7 @@ def load_cnets(cnet_list, use_channel):
     return SlfIndex(uttrs())
 
 
-def parse_args():
+def get_arg_parser():
     parser = argparse.ArgumentParser(
         prog='asreval-kwsmap',
         description='Compute Mean Average Precision for KWS')
@@ -151,12 +160,10 @@ def parse_args():
                              'before file extension',
                         choices=['file', 'directory'])
 
-    return parser.parse_args()
+    return parser
 
 
-def main():
-    args = parse_args()
-
+def run_script(args):
     stm = load_stm(args.stm)
     term_list = []
     if args.term_list:
@@ -188,6 +195,13 @@ def main():
                                      word_ap[word],
                                      stm.uttr_count(word)))
 
+    return 0
+
+
+def main():
+    args = get_arg_parser().parse_args()
+    return run_script(args)
+
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
