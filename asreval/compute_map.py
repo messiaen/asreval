@@ -12,6 +12,7 @@ from future import standard_library
 standard_library.install_aliases()
 import os
 import re
+import io
 import argparse
 import gzip
 import sys
@@ -28,8 +29,9 @@ from collections import defaultdict
 
 gzip_open = gzip.open
 if six.PY2:
-    def py2_gzip_open(fn, mode, encoding='utf=8'):
-        return gzip.open(fn, mode)
+    def py2_gzip_open(fn, mode, encoding='utf-8'):
+        with gzip.open(fn, 'rb') as f:
+            return io.StringIO(f.read().decode('utf-8'))
     gzip_open = py2_gzip_open
 
 
@@ -56,7 +58,7 @@ def ext_audio_id(s):
 def load_word_list(word_list_file):
     word_list = set()
 
-    with open(word_list_file, 'r') as file:
+    with open(word_list_file, 'r', encoding='utf-8') as file:
         if '.dict' in word_list_file:
 
             for line in file:
