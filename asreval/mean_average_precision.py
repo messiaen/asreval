@@ -170,17 +170,17 @@ def labeled_uttr_arc_lists(query_word, hyp_uttrs, ref, min_match_ratio=0.5):
 
 
 def labeled_arc_matches(arcs, audio_id, channel, ref, min_match_ratio=0.5):
-        for arc in arcs:
-            has_time_match = False
-            has_word_match = False
-            max_ratio = min_match_ratio
+    for arc in arcs:
+        has_time_match = False
+        has_word_match = False
+        max_ratio = min_match_ratio
 
-            for ref_uttr in ref.uttrs(audio_id, channel):
-                time_match_ratio = ref_uttr.time_match_ratio(
-                    arc.start_time,
-                    arc.end_time)
-                if time_match_ratio > max_ratio:
-                    max_ratio = time_match_ratio
-                    has_time_match = True
-                    has_word_match = arc.word in ref_uttr
-            yield LabeledSlfEdge(arc, has_time_match, has_word_match)
+        for ref_uttr in ref.uttrs(audio_id, channel):
+            time_match_ratio = ref_uttr.time_match_ratio(
+                arc.start_time,
+                arc.end_time)
+            if time_match_ratio > max_ratio:
+                max_ratio = time_match_ratio
+                has_time_match = True
+                has_word_match = arc.word in ref_uttr
+        yield LabeledSlfEdge(arc, has_time_match, has_word_match)

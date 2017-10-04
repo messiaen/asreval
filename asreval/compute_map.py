@@ -41,11 +41,11 @@ def load_stm(truth_file):
 
 
 term_id = defaultdict()
-xml_line_re = re.compile('\s*<term termid="(.*)"><termtext>(.*)</termtext>.*')
-dict_line_re = re.compile('>(\S+)\s')
+xml_line_re = re.compile(u'\s*<term termid="(.*)"><termtext>(.*)</termtext>.*', re.UNICODE)
+dict_line_re = re.compile(u'>(\S+)\s', re.UNICODE)
 
 
-cnet_uttr_re = re.compile('UTTERANCE=((.*)-\d+)')
+cnet_uttr_re = re.compile(u'UTTERANCE=((.*)-\d+)', re.UNICODE)
 
 
 def ext_audio_id(s):

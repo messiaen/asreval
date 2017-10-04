@@ -112,3 +112,18 @@ def test_stream_stm_utterances():
         'TUESDAY AUGUST EIGHTEENTH'.split(),
         audio_id='260-123286-0020',
         channel='A')
+
+
+def test_stream_stm_utterances_unk():
+    test_stm_filename = os.path.join(os.path.dirname(__file__), '3test_unk.stm')
+    with open(test_stm_filename, 'r') as f:
+        uttrs = list(parse_stm_utterances(f))
+
+    assert len(uttrs) == 24
+
+    assert uttrs[0] == StmUtterance(
+        0.0,
+        5.415,
+        '<unk> UNDERSCORE THESE WORDS FOR THEY ARE FULL OF COMFORT FOR SORE CONSCIENCES'.split(),
+        audio_id='2830-3980-0063',
+        channel='A')

@@ -15,6 +15,7 @@ import os
 import pytest
 import contextlib
 
+import asreval.compute_map
 from asreval.compute_map import run_script
 from asreval.compute_map import get_arg_parser
 
@@ -25,6 +26,7 @@ def create_cnet_list(cnet_path):
         for fn in os.listdir(cnet_path):
             if fn.endswith('.lat') or fn.endswith('.lat.gz'):
                 f.write(os.path.join(cnet_path, fn) + '\n')
+                f.flush()
         yield f.name
 
 
@@ -58,6 +60,7 @@ def cnet_unicode_list_file(dir_name):
 
 
 def test_run_script_uncompressed(dir_name, cnet_list_file):
+    asreval.compute_map.ext_audio_id = None
     stm_fn = os.path.join(dir_name, '3test.stm')
     cnet_lst = cnet_list_file
     use_chn = 'directory'
@@ -73,6 +76,7 @@ def test_run_script_uncompressed(dir_name, cnet_list_file):
 
 
 def test_run_script_compressed(dir_name, gzcnet_list_file):
+    asreval.compute_map.ext_audio_id = None
     stm_fn = os.path.join(dir_name, '3test.stm')
     cnet_lst = gzcnet_list_file
     use_chn = 'directory'
@@ -88,6 +92,7 @@ def test_run_script_compressed(dir_name, gzcnet_list_file):
 
 
 def test_uncompressed_unicode(dir_name, cnet_unicode_list_file):
+    asreval.compute_map.ext_audio_id = None
     stm_fn = os.path.join(dir_name, '3test-utf8.stm')
     cnet_lst = cnet_unicode_list_file
     use_chn = 'directory'
@@ -103,6 +108,7 @@ def test_uncompressed_unicode(dir_name, cnet_unicode_list_file):
 
 
 def test_compressed_unicode(dir_name, gzcnet_unicode_list_file):
+    asreval.compute_map.ext_audio_id = None
     stm_fn = os.path.join(dir_name, '3test-utf8.stm')
     cnet_lst = gzcnet_unicode_list_file
     use_chn = 'directory'
@@ -118,6 +124,7 @@ def test_compressed_unicode(dir_name, gzcnet_unicode_list_file):
 
 
 def test_word_list_unicode(dir_name, gzcnet_unicode_list_file):
+    asreval.compute_map.ext_audio_id = None
     stm_fn = os.path.join(dir_name, '3test-utf8.stm')
     cnet_lst = gzcnet_unicode_list_file
     word_list_fn = os.path.join(dir_name, 'word_list.xml')
