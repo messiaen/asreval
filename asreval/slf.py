@@ -77,7 +77,7 @@ class SlfIndex(object):
 
     @property
     def speech_dur(self):
-        return self._speech_dur
+        return round(self._speech_dur, 2)
 
     @property
     def words(self):

@@ -45,8 +45,9 @@ def test_kws_map():
     assert results.total_possible_hits == 286
     assert results.total_tp == 278
     assert results.total_fp == 119
-    assert sum(results.no_time_match_counts.values()) == 1
+    assert results.num_no_time_match_hypotheses == 1
     assert abs(results.mean_ave_precision - 0.9151) < 0.0001
+    assert abs(results.recall - 0.9720) < 0.0001
 
 
 def test_select_best_arc():

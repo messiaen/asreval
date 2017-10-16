@@ -17,13 +17,81 @@ __all__ = ['KwsMapResults',
            'kws_mean_ave_precision']
 
 
-KwsMapResults = namedtuple('KwsMapResults', ['mean_ave_precision',
-                                             'word_ap',
-                                             'total_tp',
-                                             'total_fp',
-                                             'total_possible_hits',
-                                             'arc_counts',
-                                             'no_time_match_counts'])
+class KwsMapResults(object):
+    __slots__ = ['_mean_ave_precision',
+                 'word_ap',
+                 'total_tp',
+                 'total_fp',
+                 'total_possible_hits',
+                 'arc_counts',
+                 'no_time_match_counts']
+
+    def __init__(self,
+                 mean_ave_precision=None,
+                 word_ap=None,
+                 total_tp=None,
+                 total_fp=None,
+                 total_possible_hits=None,
+                 arc_counts=None,
+                 no_time_match_counts=None):
+        self._mean_ave_precision = mean_ave_precision
+        self.word_ap = word_ap
+        self.total_tp = total_tp
+        self.total_fp = total_fp
+        self.total_possible_hits = total_possible_hits
+        self.arc_counts = arc_counts
+        self.no_time_match_counts = no_time_match_counts
+
+    @property
+    def num_no_time_match_hypotheses(self):
+        return sum(self.no_time_match_counts.values())
+
+    @property
+    def recall(self):
+        return round(self.total_tp / self.total_possible_hits, 4)
+
+    @property
+    def mean_ave_precision(self):
+        return round(self._mean_ave_precision, 4)
+
+    def __eq__(self, o):
+        if not isinstance(o, KwsMapResults):
+            return False
+        a = (self.mean_ave_precision,
+             self.word_ap,
+             self.total_tp,
+             self.total_fp,
+             self.total_possible_hits,
+             self.arc_counts,
+             self.no_time_match_counts)
+        b = (o.mean_ave_precision,
+             o.word_ap,
+             o.total_tp,
+             o.total_fp,
+             o.total_possible_hits,
+             o.arc_counts,
+             o.no_time_match_counts)
+        return a == b
+
+    def __repr__(self):
+        s = 'KwsMapResults(mean_ave_precision={0}, '
+        s += 'word_ap={1}, '
+        s += 'total_tp={2}, '
+        s += 'total_fp={3}, '
+        s += 'total_possible_hits={4}, '
+        s += 'arc_counts={5}, '
+        s += 'no_time_match_counts={6})'.format(
+            self.mean_ave_precision,
+            self.word_ap,
+            self.total_tp,
+            self.total_fp,
+            self.total_possible_hits,
+            self.arc_counts,
+            self.no_time_match_counts)
+        return s
+
+    def __str__(self):
+        return repr(self)
 
 
 def kws_mean_ave_precision(word_list, hypothesis, ref, min_match_ratio=0.5):

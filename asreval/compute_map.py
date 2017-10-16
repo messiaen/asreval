@@ -180,15 +180,13 @@ def run_script(args):
     word_ap = results.word_ap
 
     print("\n")
-    print("Total speech duration (seconds): {}".format(
-        round(slf.speech_dur)))
+    print("Total speech duration (seconds): {}".format(slf.speech_dur))
     print("Total number of terms: {}".format(len(term_list)))
     print("Total possible hits: {}".format(results.total_possible_hits))
     print("Total true positives: {}".format(int(results.total_tp)))
     print("Total false positives: {}".format(int(results.total_fp)))
-    print("Total hypotheses not matching STM window: {}".format(
-        sum(results.no_time_match_counts.values())))
-    print("Recall: {}".format(results.total_tp / results.total_possible_hits))
+    print("Total hypotheses not matching STM window: {}".format(results.num_no_time_match_hypotheses))
+    print("Recall: {}".format(results.mean_ave_precision))
     print("mAP: {}".format(map_score))
     if args.list_ap:
         print("\nAverage Precision for Words:")
