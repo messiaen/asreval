@@ -21,6 +21,7 @@ import six
 from asreval.slf import SlfIndex
 from asreval.parse import parse_cnet_utterances
 from asreval.parse import parse_stm_utterances
+from asreval.parse import parse_ctm_utterances
 from asreval.stm import Stm
 from asreval.mean_average_precision import kws_mean_ave_precision
 
@@ -38,6 +39,11 @@ if six.PY2:
 def load_stm(truth_file):
     with open(truth_file, 'r', encoding='utf-8') as f:
         return Stm(parse_stm_utterances(f))
+
+
+def load_ctm(truth_file):
+    with open(truth_file, 'r', encoding='utf-8') as f:
+        return Stm(parse_ctm_utterances(f))
 
 
 term_id = defaultdict()
@@ -142,10 +148,15 @@ def get_arg_parser():
                         help='File containing a list of consensus network ' +
                              'files to calculate mAP for.')
 
-    parser.add_argument('--stm',
-                        dest='stm',
-                        required=True,
-                        help='File containing the truth for each cnet listed.')
+    truth_group = parser.add_mutually_exclusive_group(required=True)
+
+    truth_group.add_argument('--stm',
+                             dest='stm',
+                             help='File containing the truth for each cnet listed.')
+
+    truth_group.add_argument('--ctm',
+                             dest='ctm',
+                             help='File containing the truth for each cnet listed.')
 
     parser.add_argument('--ave-precision-by-term',
                         dest='list_ap',
@@ -166,7 +177,13 @@ def get_arg_parser():
 
 
 def run_script(args):
-    stm = load_stm(args.stm)
+    truth_file = args.stm
+    if not truth_file:
+        truth_file = args.ctm
+        stm = load_ctm(truth_file)
+    else:
+        stm = load_stm(truth_file)
+
     term_list = []
     if args.term_list:
         term_list = load_word_list(args.term_list)

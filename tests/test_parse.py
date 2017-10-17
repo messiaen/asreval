@@ -129,6 +129,7 @@ def test_stream_stm_utterances_unk():
         audio_id='2830-3980-0063',
         channel='A')
 
+
 def test_stream_ctm_utterances():
     test_ctm_filename = os.path.join(os.path.dirname(__file__), 'test.ctm')
     with open(test_ctm_filename, 'r') as f:
@@ -137,7 +138,7 @@ def test_stream_ctm_utterances():
     assert len(uttrs) == 5
     assert StmUtterance(11.34,
                         17.70,
-                        words=['YES', 'YOU', 'CAN', 'AS', 'I'],
+                        words=['YES', 'YOU', 'CAN', 'AS'],
                         audio_id='7654',
                         channel='A') == uttrs[0]
 
@@ -149,7 +150,7 @@ def test_stream_ctm_utterances():
 
     assert StmUtterance(11.34,
                         17.70,
-                        words=['I', 'CAN', 'ADD', 'AS'],
+                        words=['YES', 'YOU', 'CAN', 'AS'],
                         audio_id='7655',
                         channel='A') == uttrs[2]
 

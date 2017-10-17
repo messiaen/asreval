@@ -101,11 +101,11 @@ class StmUtterance(object):
                       self.words,
                       self.audio_id,
                       self.channel)
-        other_tuple = (self.start_time,
-                       self.end_time,
-                       self.words,
-                       self.audio_id,
-                       self.channel)
+        other_tuple = (o.start_time,
+                       o.end_time,
+                       o.words,
+                       o.audio_id,
+                       o.channel)
         return this_tuple == other_tuple
 
     # TODO clean up
