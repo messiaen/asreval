@@ -11,6 +11,7 @@ import os
 import re
 
 from asreval.parse import parse_stm_utterances
+from asreval.parse import parse_ctm_utterances
 from asreval.parse import _parse_cnet_utterance
 from asreval.parse import parse_cnet_utterances
 from asreval.parse import lines_from_file_list
@@ -127,3 +128,39 @@ def test_stream_stm_utterances_unk():
         '<unk> UNDERSCORE THESE WORDS FOR THEY ARE FULL OF COMFORT FOR SORE CONSCIENCES'.split(),
         audio_id='2830-3980-0063',
         channel='A')
+
+def test_stream_ctm_utterances():
+    test_ctm_filename = os.path.join(os.path.dirname(__file__), 'test.ctm')
+    with open(test_ctm_filename, 'r') as f:
+        uttrs = list(parse_ctm_utterances(f))
+
+    assert len(uttrs) == 5
+    assert StmUtterance(11.34,
+                        17.70,
+                        words=['YES', 'YOU', 'CAN', 'AS', 'I'],
+                        audio_id='7654',
+                        channel='A') == uttrs[0]
+
+    assert StmUtterance(1.34,
+                        7.20,
+                        words=['I', 'CAN', 'ADD', 'AS'],
+                        audio_id='7654',
+                        channel='B') == uttrs[1]
+
+    assert StmUtterance(11.34,
+                        17.70,
+                        words=['I', 'CAN', 'ADD', 'AS'],
+                        audio_id='7655',
+                        channel='A') == uttrs[2]
+
+    assert StmUtterance(1.34,
+                        7.20,
+                        words=['I', 'CAN', 'ADD', 'AS'],
+                        audio_id='7655',
+                        channel='B') == uttrs[3]
+
+    assert StmUtterance(0.00,
+                        5.00,
+                        words=['HERE', 'IS', 'A', 'TEST', 'UTTERANCE'],
+                        audio_id='7677',
+                        channel='A') == uttrs[4]
