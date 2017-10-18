@@ -140,3 +140,19 @@ def test_word_list_unicode(dir_name, gzcnet_unicode_list_file):
 
     args = get_arg_parser().parse_args(cmd_args)
     run_script(args)
+
+
+def test_ctm_reference(dir_name, gzcnet_list_file):
+    asreval.compute_map.ext_audio_id = None
+    ctm_fn = os.path.join(dir_name, '3test.ctm')
+    cnet_lst = gzcnet_list_file
+    use_chn = 'directory'
+    cmd_args = ['--ctm',
+                ctm_fn,
+                '--cnet-list',
+                cnet_lst,
+                '--use-channel',
+                use_chn]
+
+    args = get_arg_parser().parse_args(cmd_args)
+    run_script(args)

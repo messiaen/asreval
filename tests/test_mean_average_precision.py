@@ -17,6 +17,7 @@ from asreval.mean_average_precision import select_best_arc
 from asreval.slf import SlfEdge
 from asreval.slf import LabeledSlfEdge
 from asreval.parse import parse_stm_utterances
+from asreval.parse import parse_ctm_utterances
 from asreval.parse import parse_cnet_utterances
 from asreval.parse import lines_from_file_list
 
@@ -25,6 +26,35 @@ def test_kws_map():
     test_stm_filename = os.path.join(os.path.dirname(__file__), '3test.stm')
     with open(test_stm_filename, 'r') as f:
         stmRef = Stm(parse_stm_utterances(f))
+    word_list = stmRef.word_list
+
+    cnet_dir = os.path.join(os.path.dirname(__file__), '3cnets-A')
+
+    cnet_list = map(lambda fn: os.path.join(cnet_dir, fn),
+                    filter(lambda x: x.endswith('.lat'),
+                           os.listdir(cnet_dir)))
+
+    line_iter = lines_from_file_list(cnet_list)
+    cnet_uttrs = list(parse_cnet_utterances(line_iter, channel='A'))
+
+    assert len(cnet_uttrs) == 24
+    assert len(word_list) == 196
+
+    cnetIndex = SlfIndex(cnet_uttrs)
+
+    results = kws_mean_ave_precision(word_list, cnetIndex, stmRef)
+    assert results.total_possible_hits == 286
+    assert results.total_tp == 278
+    assert results.total_fp == 119
+    assert results.num_no_time_match_hypotheses == 1
+    assert abs(results.mean_ave_precision - 0.9151) < 0.0001
+    assert abs(results.recall - 0.9720) < 0.0001
+
+
+def test_kws_map_ctm():
+    test_stm_filename = os.path.join(os.path.dirname(__file__), '3test.ctm')
+    with open(test_stm_filename, 'r') as f:
+        stmRef = Stm(parse_ctm_utterances(f))
     word_list = stmRef.word_list
 
     cnet_dir = os.path.join(os.path.dirname(__file__), '3cnets-A')

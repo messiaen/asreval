@@ -17,6 +17,7 @@ from asreval.stm import StmUtterance
 
 
 __all__ = ['parse_stm_utterances',
+           'parse_ctm_utterances',
            'parse_cnet_utterances']
 
 # TODO this parses some subset / extension of standard slf and stm files
@@ -28,6 +29,48 @@ cnet_uttr_info_re = re.compile(u'N=(\d+)\s+L=(\d+)', re.UNICODE)
 cnet_node_re = re.compile(u'I=(\S+)\s+t=(\S+)', re.UNICODE)
 cnet_edge_re = re.compile(
     u'J=(\S+)+\s+S=(\S+)\s+E=(\S+)\s+W=(.*)\s+v=\S+\s+a=\S+\s+l=\S+\s+s=(\S+)', re.UNICODE)
+
+
+def parse_ctm_utterances(lines):
+    last_audio_id = None
+    last_channel = None
+    start_times = []
+    last_duration = None
+    words = []
+    for line in filter(lambda l: len(l) > 0, lines):
+        if line.startswith(';;'):
+            continue
+        elif len(line.strip()) <= 0:
+            continue
+        fields = line.strip().split()
+        audio_id = fields[0]
+        channel = fields[1]
+        start_time = fields[2]
+        duration = fields[3]
+        word = fields[4]
+
+        if (last_audio_id and last_channel
+                and (last_audio_id, last_channel) != (audio_id, channel)):
+            yield StmUtterance(float(start_times[0]),
+                               float(start_times[-1]) + float(last_duration),
+                               words,
+                               channel=last_channel,
+                               audio_id=last_audio_id)
+            start_times = []
+            words = []
+
+        last_audio_id = audio_id
+        last_channel = channel
+        start_times.append(start_time)
+        last_duration = duration
+        words.append(word)
+
+    if last_audio_id:
+        yield StmUtterance(float(start_times[0]),
+                           float(start_times[-1]) + float(last_duration),
+                           words,
+                           channel=last_channel,
+                           audio_id=last_audio_id)
 
 
 def parse_stm_utterances(lines):
