@@ -202,7 +202,8 @@ def run_script(args):
     print("Total possible hits: {}".format(results.total_possible_hits))
     print("Total true positives: {}".format(int(results.total_tp)))
     print("Total false positives: {}".format(int(results.total_fp)))
-    print("Total hypotheses not matching STM window: {}".format(results.num_no_time_match_hypotheses))
+    print("Total hypotheses not matching reference window: {}".format(
+        results.num_no_time_match_hypotheses))
     print("Recall: {}".format(results.mean_ave_precision))
     print("mAP: {}".format(map_score))
     if args.list_ap:
