@@ -15,8 +15,11 @@ $ python setup.py install
 ```
 $ asreval-kwsmap --help
 
-usage: asreval-kwsmap [-h] [--term-list TERM_LIST] --cnet-list CNET_LIST --stm
-                      STM [--ave-precision-by-term]
+usage: asreval-kwsmap [-h] [--term-list TERM_LIST] --cnet-list CNET_LIST
+                      (--stm STM | --ctm CTM)
+                      [--ctm-max-silence CTM_MAX_SILENCE]
+                      [--ctm-max-uttr-len CTM_MAX_UTTR_LEN]
+                      [--ave-precision-by-term]
                       [--use-channel {file,directory}]
 
 Compute Mean Average Precision for KWS
@@ -32,6 +35,15 @@ optional arguments:
                         File containing a list of consensus network files to
                         calculate mAP for.
   --stm STM             File containing the truth for each cnet listed.
+  --ctm CTM             File containing the truth for each cnet listed.
+  --ctm-max-silence CTM_MAX_SILENCE
+                        Silence gap in seconds to split utterances when useing
+                        a ctm reference (-1.0 for no splitting on silence gap)
+                        (default: 3.0).
+  --ctm-max-uttr-len CTM_MAX_UTTR_LEN
+                        Maximum len in seconds of a single utterance when
+                        using a ctm reference (-1.0 for no splitting on max
+                        len) (default: 15.0)
   --ave-precision-by-term
                         List average precision for each word.
   --use-channel {file,directory}
