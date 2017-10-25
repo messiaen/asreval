@@ -3,7 +3,6 @@ from __future__ import division
 from __future__ import unicode_literals
 from __future__ import absolute_import
 from builtins import int
-from builtins import round
 from builtins import filter
 from builtins import map
 from builtins import open
@@ -41,9 +40,17 @@ def load_stm(truth_file):
         return Stm(parse_stm_utterances(f))
 
 
-def load_ctm(truth_file):
+def load_ctm(truth_file, max_uttr_len=15.0, max_silence=3.0):
+    max_len = None
+    if max_uttr_len >= 0.0:
+        max_len = max_uttr_len
+
+    silence = None
+    if max_silence >= 0.0:
+        silence = max_silence
+
     with open(truth_file, 'r', encoding='utf-8') as f:
-        return Stm(parse_ctm_utterances(f))
+        return Stm(parse_ctm_utterances(f, max_len, silence))
 
 
 term_id = defaultdict()
@@ -158,6 +165,18 @@ def get_arg_parser():
                              dest='ctm',
                              help='File containing the truth for each cnet listed.')
 
+    parser.add_argument('--ctm-max-silence',
+                        dest='ctm_max_silence',
+                        type=float,
+                        default=3.0,
+                        help='Silence gap in seconds to split utterances when useing a ctm reference (-1.0 for no splitting on silence gap) (default: 3.0).')
+
+    parser.add_argument('--ctm-max-uttr-len',
+                        dest='ctm_max_uttr_len',
+                        type=float,
+                        default=15.0,
+                        help='Maximum len in seconds of a single utterance when using a ctm reference (-1.0 for no splitting on max len) (default: 15.0)')
+
     parser.add_argument('--ave-precision-by-term',
                         dest='list_ap',
                         required=False,
@@ -180,7 +199,7 @@ def run_script(args):
     truth_file = args.stm
     if not truth_file:
         truth_file = args.ctm
-        stm = load_ctm(truth_file)
+        stm = load_ctm(truth_file, args.ctm_max_uttr_len, args.ctm_max_silence)
     else:
         stm = load_stm(truth_file)
 

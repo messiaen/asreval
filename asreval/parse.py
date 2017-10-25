@@ -31,11 +31,39 @@ cnet_edge_re = re.compile(
     u'J=(\S+)+\s+S=(\S+)\s+E=(\S+)\s+W=(.*)\s+v=\S+\s+a=\S+\s+l=\S+\s+s=(\S+)', re.UNICODE)
 
 
-def parse_ctm_utterances(lines):
+def parse_ctm_utterances(lines, max_uttr_len=10.0, max_silence=3.0):
+    def diff_audio(last_audio_id, last_channel, audio_id, channel):
+        return (last_audio_id, last_channel) != (audio_id, channel)
+
+    def over_max_uttr_len(first_start, start_time, duration):
+        if max_uttr_len is None:
+            return False
+        return abs((start_time + duration) - first_start) >= max_uttr_len
+
+    def over_max_silence(last_start, last_dur, start_time):
+        if max_silence is None:
+            return False
+        return abs(start_time - (last_start + last_dur)) >= max_silence
+
+    def should_break(last_audio_id,
+                     audio_id,
+                     last_channel,
+                     channel,
+                     start_times,
+                     start_time,
+                     last_dur,
+                     duration):
+        if last_audio_id is None and last_audio_id is None:
+            return False
+        else:
+            return (diff_audio(last_audio_id, last_channel, audio_id, channel)
+                    or over_max_uttr_len(start_times[0], start_time, duration)
+                    or over_max_silence(start_times[-1], last_dur, start_time))
+
     last_audio_id = None
     last_channel = None
     start_times = []
-    last_duration = None
+    last_dur = None
     words = []
     for line in filter(lambda l: len(l) > 0, lines):
         if line.startswith(';;'):
@@ -45,14 +73,20 @@ def parse_ctm_utterances(lines):
         fields = line.strip().split()
         audio_id = fields[0]
         channel = fields[1]
-        start_time = fields[2]
-        duration = fields[3]
+        start_time = float(fields[2])
+        duration = float(fields[3])
         word = fields[4]
 
-        if (last_audio_id and last_channel
-                and (last_audio_id, last_channel) != (audio_id, channel)):
-            yield StmUtterance(float(start_times[0]),
-                               float(start_times[-1]) + float(last_duration),
+        if should_break(last_audio_id,
+                        audio_id,
+                        last_channel,
+                        channel,
+                        start_times,
+                        start_time,
+                        last_dur,
+                        duration):
+            yield StmUtterance(start_times[0],
+                               start_times[-1] + last_dur,
                                words,
                                channel=last_channel,
                                audio_id=last_audio_id)
@@ -62,12 +96,12 @@ def parse_ctm_utterances(lines):
         last_audio_id = audio_id
         last_channel = channel
         start_times.append(start_time)
-        last_duration = duration
+        last_dur = duration
         words.append(word)
 
     if last_audio_id:
-        yield StmUtterance(float(start_times[0]),
-                           float(start_times[-1]) + float(last_duration),
+        yield StmUtterance(start_times[0],
+                           start_times[-1] + last_dur,
                            words,
                            channel=last_channel,
                            audio_id=last_audio_id)

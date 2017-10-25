@@ -54,7 +54,7 @@ def test_kws_map():
 def test_kws_map_ctm():
     test_stm_filename = os.path.join(os.path.dirname(__file__), '3test.ctm')
     with open(test_stm_filename, 'r') as f:
-        stmRef = Stm(parse_ctm_utterances(f))
+        stmRef = Stm(parse_ctm_utterances(f, None, None))
     word_list = stmRef.word_list
 
     cnet_dir = os.path.join(os.path.dirname(__file__), '3cnets-A')

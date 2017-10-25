@@ -79,7 +79,6 @@ J=11 S=0 E=6 W=</s> v=0 a=0 l=0 s=0.021201
     assert uttr.audio_id == 'utt_1234'
 
 
-
 def test_parse_cnet_utterances():
     cnet_dir = os.path.join(os.path.dirname(__file__), '3cnets-A')
 
@@ -130,10 +129,28 @@ def test_stream_stm_utterances_unk():
         channel='A')
 
 
+def test_stream_ctm_utterances_always_split():
+    test_ctm_filename = os.path.join(os.path.dirname(__file__), 'test.ctm')
+    with open(test_ctm_filename, 'r') as f:
+        uttrs = list(parse_ctm_utterances(f, 0.0, None))
+
+    assert len(uttrs) == 21
+
+    with open(test_ctm_filename, 'r') as f:
+        uttrs = list(parse_ctm_utterances(f, None, 0.0))
+
+    assert len(uttrs) == 21
+
+    with open(test_ctm_filename, 'r') as f:
+        uttrs = list(parse_ctm_utterances(f, 0.0, 0.0))
+
+    assert len(uttrs) == 21
+
+
 def test_stream_ctm_utterances():
     test_ctm_filename = os.path.join(os.path.dirname(__file__), 'test.ctm')
     with open(test_ctm_filename, 'r') as f:
-        uttrs = list(parse_ctm_utterances(f))
+        uttrs = list(parse_ctm_utterances(f, None, None))
 
     assert len(uttrs) == 5
     assert StmUtterance(11.34,
@@ -161,7 +178,141 @@ def test_stream_ctm_utterances():
                         channel='B') == uttrs[3]
 
     assert StmUtterance(0.00,
-                        5.00,
+                        13.00,
                         words=['HERE', 'IS', 'A', 'TEST', 'UTTERANCE'],
                         audio_id='7677',
                         channel='A') == uttrs[4]
+
+
+def test_stream_ctm_utterances_max_silence():
+    test_ctm_filename = os.path.join(os.path.dirname(__file__), 'test.ctm')
+    with open(test_ctm_filename, 'r') as f:
+        uttrs = list(parse_ctm_utterances(f, None, 3.0))
+
+    assert len(uttrs) == 9
+    assert StmUtterance(11.34,
+                        13.80,
+                        words=['YES', 'YOU', 'CAN'],
+                        audio_id='7654',
+                        channel='A') == uttrs[0]
+
+    assert StmUtterance(17.5,
+                        17.70,
+                        words=['AS'],
+                        audio_id='7654',
+                        channel='A') == uttrs[1]
+
+    assert StmUtterance(1.34,
+                        3.90,
+                        words=['I', 'CAN', 'ADD'],
+                        audio_id='7654',
+                        channel='B') == uttrs[2]
+
+    assert StmUtterance(7.0,
+                        7.20,
+                        words=['AS'],
+                        audio_id='7654',
+                        channel='B') == uttrs[3]
+
+    assert StmUtterance(11.34,
+                        13.8,
+                        words=['YES', 'YOU', 'CAN'],
+                        audio_id='7655',
+                        channel='A') == uttrs[4]
+
+    assert StmUtterance(17.5,
+                        17.70,
+                        words=['AS'],
+                        audio_id='7655',
+                        channel='A') == uttrs[5]
+
+    assert StmUtterance(1.34,
+                        3.90,
+                        words=['I', 'CAN', 'ADD'],
+                        audio_id='7655',
+                        channel='B') == uttrs[6]
+
+    assert StmUtterance(7.0,
+                        7.20,
+                        words=['AS'],
+                        audio_id='7655',
+                        channel='B') == uttrs[7]
+
+    assert StmUtterance(0.00,
+                        13.00,
+                        words=['HERE', 'IS', 'A', 'TEST', 'UTTERANCE'],
+                        audio_id='7677',
+                        channel='A') == uttrs[8]
+
+
+def test_stream_ctm_utterances_max_len():
+    test_ctm_filename = os.path.join(os.path.dirname(__file__), 'test.ctm')
+    with open(test_ctm_filename, 'r') as f:
+        uttrs = list(parse_ctm_utterances(f, 10.0, 3.0))
+
+    assert len(uttrs) == 11
+    assert StmUtterance(11.34,
+                        13.80,
+                        words=['YES', 'YOU', 'CAN'],
+                        audio_id='7654',
+                        channel='A') == uttrs[0]
+
+    assert StmUtterance(17.5,
+                        17.70,
+                        words=['AS'],
+                        audio_id='7654',
+                        channel='A') == uttrs[1]
+
+    assert StmUtterance(1.34,
+                        3.90,
+                        words=['I', 'CAN', 'ADD'],
+                        audio_id='7654',
+                        channel='B') == uttrs[2]
+
+    assert StmUtterance(7.0,
+                        7.20,
+                        words=['AS'],
+                        audio_id='7654',
+                        channel='B') == uttrs[3]
+
+    assert StmUtterance(11.34,
+                        13.8,
+                        words=['YES', 'YOU', 'CAN'],
+                        audio_id='7655',
+                        channel='A') == uttrs[4]
+
+    assert StmUtterance(17.5,
+                        17.70,
+                        words=['AS'],
+                        audio_id='7655',
+                        channel='A') == uttrs[5]
+
+    assert StmUtterance(1.34,
+                        3.90,
+                        words=['I', 'CAN', 'ADD'],
+                        audio_id='7655',
+                        channel='B') == uttrs[6]
+
+    assert StmUtterance(7.0,
+                        7.20,
+                        words=['AS'],
+                        audio_id='7655',
+                        channel='B') == uttrs[7]
+
+    assert StmUtterance(0.00,
+                        3.00,
+                        words=['HERE', 'IS', 'A'],
+                        audio_id='7677',
+                        channel='A') == uttrs[8]
+
+    assert StmUtterance(3.00,
+                        12.00,
+                        words=['TEST'],
+                        audio_id='7677',
+                        channel='A') == uttrs[9]
+
+    assert StmUtterance(12.00,
+                        13.00,
+                        words=['UTTERANCE'],
+                        audio_id='7677',
+                        channel='A') == uttrs[10]
