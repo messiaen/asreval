@@ -25,7 +25,7 @@ setup(
     ],
     tests_require=['pytest'],
     setup_requires=['pytest-runner'],
-    install_requires=['future', 'six'],
+    install_requires=['future', 'six', 'numpy'],
     entry_points={
         'console_scripts': [
             'asreval-kwsmap = asreval.compute_map:main',

@@ -12,6 +12,7 @@ from future import standard_library
 from build.lib.asreval.parse import lines_from_file_list, parse_cnet_utterances
 
 standard_library.install_aliases()
+import numpy as np
 
 from asreval import StmUtterance, SlfIndex, Stm, parse_stm_utterances
 from asreval import SlfEdge
@@ -20,6 +21,7 @@ from asreval import word_uttr_scores
 from asreval import word_lst_uttr_scores
 from asreval import WordUttrScore
 from asreval.word_uttr_scores import max_word_score
+from asreval.word_uttr_scores import truth_and_scores
 
 
 def test_max_score():
@@ -221,3 +223,55 @@ def test_word_lst_target_scores():
     assert expected_scores[0].word == actual_scores[0].word
     assert expected_scores[0].score == actual_scores[0].score
     assert expected_scores[0].truth == actual_scores[0].truth
+
+
+def test_truth_and_scores():
+    test_stm_filename = os.path.join(os.path.dirname(__file__), '3test.stm')
+    with open(test_stm_filename, 'r') as f:
+        ref_utterances = list(parse_stm_utterances(f))
+
+    cnet_dir = os.path.join(os.path.dirname(__file__), '3cnets-A')
+
+    cnet_list = map(lambda fn: os.path.join(cnet_dir, fn),
+                    filter(lambda x: x.endswith('.lat'),
+                           os.listdir(cnet_dir)))
+
+    line_iter = lines_from_file_list(cnet_list)
+    cnet_uttrs = list(parse_cnet_utterances(line_iter, channel='A'))
+
+    assert len(cnet_uttrs) == 24
+    assert len(ref_utterances) == 24
+
+    cnetIndex = SlfIndex(cnet_uttrs)
+    actual_word_scores = word_lst_uttr_scores(['I', 'PROFESSOR'], ref_utterances, cnetIndex)
+    actual_word_scores_lst = list(actual_word_scores)
+
+    expected_truth = np.zeros(48, dtype='int')
+    expected_truth[5] = 1
+    expected_truth[13] = 1
+    expected_truth[14] = 1
+    expected_truth[15] = 1
+    expected_truth[17] = 1
+    expected_truth[23] = 1
+    expected_truth[29] = 1
+    expected_truth[39] = 1
+    expected_truth[44] = 1
+
+    expected_scores = np.zeros(48, dtype='float64')
+    expected_scores[3] = actual_word_scores_lst[3].score
+    expected_scores[5] = actual_word_scores_lst[5].score
+    expected_scores[7] = actual_word_scores_lst[7].score
+    expected_scores[13] = actual_word_scores_lst[13].score
+    expected_scores[14] = actual_word_scores_lst[14].score
+    expected_scores[15] = actual_word_scores_lst[15].score
+    expected_scores[17] = actual_word_scores_lst[17].score
+    expected_scores[22] = actual_word_scores_lst[22].score
+    expected_scores[23] = actual_word_scores_lst[23].score
+    expected_scores[29] = actual_word_scores_lst[29].score
+    expected_scores[39] = actual_word_scores_lst[39].score
+    expected_scores[44] = actual_word_scores_lst[44].score
+
+    actual_truth, actual_scores = truth_and_scores(actual_word_scores_lst)
+
+    assert np.all(expected_truth == actual_truth)
+    assert np.all(expected_scores == actual_scores)

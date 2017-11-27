@@ -8,6 +8,7 @@ from builtins import int
 from future import standard_library
 standard_library.install_aliases()
 from collections import namedtuple
+import numpy as np
 
 
 __all__ = [
@@ -42,3 +43,13 @@ def max_word_score(word, ref, hypothesis):
                 if ref.time_match_ratio(edge.start_time, edge.end_time) > 0.5:
                     score = max(score, edge.score)
     return score
+
+
+def truth_and_scores(word_scores):
+    truths = []
+    scores = []
+    for _, _, _, score, truth in word_scores:
+        truths.append(truth)
+        scores.append(score)
+
+    return np.array(truths, dtype='int'), np.array(scores, dtype='float64')
