@@ -35,15 +35,12 @@ def compute_det_curve(y_true, y_scores):
     fps = 1 + threshold_idx - tps
     fns = tps[-1] - tps
 
-    tp_count = tps[-1]
-    tn_count = (fps[-1] - fps)[0]
-
     # remove repeated values at ends to cleanup the plot
     last_idx = tps.searchsorted(tps[-1]) + 1
     first_idx = fps[::-1].searchsorted(fps[0])
     thres_idxs = list(range(first_idx, last_idx))[::-1]
 
     # return the probability of fps and fns and the threshold used
-    return (fps[thres_idxs] / tp_count,
-            fns[thres_idxs] / tn_count,
+    return (fps[thres_idxs] / fps[-1],
+            fns[thres_idxs] / fns[0],
             thresholds[thres_idxs])

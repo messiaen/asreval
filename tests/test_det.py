@@ -6,6 +6,7 @@ from future import standard_library
 standard_library.install_aliases()
 import numpy as np
 import os
+import matplotlib
 
 from asreval.parse import lines_from_file_list
 from asreval.parse import parse_cnet_utterances
@@ -39,8 +40,8 @@ def test_compute_det_curve():
 
     actual_truth, actual_scores = truth_and_scores(actual_word_scores_lst)
 
-    expected_fps = np.array([0.5, 0.5, 0.5, 0.3333, 0.1666, 0.0, 0.0, 0.0, 0.0])
-    expected_fns = np.array([0.0, 0.0555, 0.1111, 0.1111, 0.1111, 0.1111, 0.1666, 0.2222, 0.2777])
+    expected_fps = np.array([0.1666, 0.1666, 0.1666, 0.1111, 0.0555, 0.0, 0.0, 0.0, 0.0])
+    expected_fns = np.array([0.0, 0.2, 0.4, 0.4, 0.4, 0.4, 0.6, 0.8, 1.0])
 
     actual_fps, actual_fns, thresholds = compute_det_curve(actual_truth, actual_scores)
 
