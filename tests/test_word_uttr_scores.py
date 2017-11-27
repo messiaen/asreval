@@ -2,19 +2,19 @@ from __future__ import division
 from __future__ import unicode_literals
 from __future__ import print_function
 from __future__ import absolute_import
-from builtins import range
-from builtins import next
-from builtins import int
 
 import os
 from future import standard_library
 
-from build.lib.asreval.parse import lines_from_file_list, parse_cnet_utterances
+from asreval.parse import lines_from_file_list
+from asreval.parse import parse_cnet_utterances
 
 standard_library.install_aliases()
 import numpy as np
 
-from asreval import StmUtterance, SlfIndex, Stm, parse_stm_utterances
+from asreval import StmUtterance
+from asreval import SlfIndex
+from asreval import parse_stm_utterances
 from asreval import SlfEdge
 from asreval import SlfUtterance
 from asreval import word_uttr_scores

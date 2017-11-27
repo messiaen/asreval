@@ -8,7 +8,6 @@ setup(
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
-        'Environment :: Console',
         'Intended Audience :: Science/Research',
         'Operating System :: POSIX :: Linux',
         'Programming Language :: Python :: 2.7',
@@ -28,7 +27,7 @@ setup(
     install_requires=['future', 'six', 'numpy'],
     entry_points={
         'console_scripts': [
-            'asreval-kwsmap = asreval.compute_map:main',
+            'asreval = asreval.asreval_script:main',
         ]
     }
 )
