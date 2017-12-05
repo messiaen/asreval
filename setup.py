@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='asreval',
     description='Tool for evaluation asr and kws systems',
-    version='0.1.0',
+    version='0.2.0',
     packages=['asreval'],
     classifiers=[
         'Development Status :: 4 - Beta',

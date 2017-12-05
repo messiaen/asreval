@@ -230,7 +230,7 @@ def get_arg_parser():
 
     subparsers = parser.add_subparsers(title='subcommands')
 
-    kwsmap_parser = subparsers.add_parser('kwsmap', help='Compute Mean Average Precision for KWS')
+    kwsmap_parser = subparsers.add_parser('kwsmap', help='Compute Mean Average Precision for KWS (When outputing csv the first row has the overall MAP)')
     kwsmap_parser.set_defaults(func=run_kwsmap)
 
     kwsmap_parser.add_argument('--ave-precision-by-term',

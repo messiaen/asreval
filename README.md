@@ -13,14 +13,12 @@ $ python setup.py install
 ### compute_map
 
 ```
-$ asreval-kwsmap --help
-
-usage: asreval-kwsmap [-h] [--term-list TERM_LIST] --cnet-list CNET_LIST
-                      (--stm STM | --ctm CTM)
-                      [--ctm-max-silence CTM_MAX_SILENCE]
-                      [--ctm-max-uttr-len CTM_MAX_UTTR_LEN]
-                      [--ave-precision-by-term]
-                      [--use-channel {file,directory}]
+$ asreval --help
+usage: asreval [-h] [--term-list TERM_LIST] --cnet-list CNET_LIST
+               (--stm STM | --ctm CTM) [--ctm-max-silence CTM_MAX_SILENCE]
+               [--ctm-max-uttr-len CTM_MAX_UTTR_LEN]
+               [--use-channel {file,directory}] [--csv]
+               {wordscores,kwsmap} ...
 
 Compute Mean Average Precision for KWS
 
@@ -44,11 +42,18 @@ optional arguments:
                         Maximum len in seconds of a single utterance when
                         using a ctm reference (-1.0 for no splitting on max
                         len) (default: 15.0)
-  --ave-precision-by-term
-                        List average precision for each word.
   --use-channel {file,directory}
                         'directory' if directory containing cnet files has
                         '-<channel>' appended.'file' if cnet file have
                         '-<channel>' before file extension
+  --csv                 CSV style output instead of report style
+
+subcommands:
+  {wordscores,kwsmap}
+    kwsmap              Compute Mean Average Precision for KWS (When outputing
+                        csv the first row has the overall MAP)
+    wordscores          Compute scores for each word utterance pair (Outputs
+                        csv rows with audio_id,channel,start_time,stop_time,wo
+                        rd,score,truth)
 ```
 
