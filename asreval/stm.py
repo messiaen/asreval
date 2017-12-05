@@ -18,13 +18,19 @@ class Stm(object):
     def __init__(self, utterances):
         self._uttrs = defaultdict(lambda: defaultdict(list))
         self._uttr_counts = Counter()
+        self._num_uttrs = 0
         for uttr in utterances:
+            self._num_uttrs += 1
             self._uttrs[uttr.audio_id][uttr.channel].append(uttr)
             self._uttr_counts.update(set(uttr.words))
 
     @property
     def word_list(self):
         return set(self._uttr_counts)
+
+    @property
+    def total_uttr_count(self):
+        return self._num_uttrs
 
     def uttr_count(self, word):
         return self._uttr_counts[word]

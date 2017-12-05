@@ -164,6 +164,28 @@ def test_word_list_unicode(dir_name, gzcnet_unicode_list_file):
     args.func(args)
 
 
+def test_word_list_unicode_csv(dir_name, gzcnet_unicode_list_file):
+    asreval.asreval_script.ext_audio_id = None
+    stm_fn = os.path.join(dir_name, '3test-utf8.stm')
+    cnet_lst = gzcnet_unicode_list_file
+    word_list_fn = os.path.join(dir_name, 'word_list.xml')
+    use_chn = 'directory'
+    cmd_args = ['--stm',
+                stm_fn,
+                '--cnet-list',
+                cnet_lst,
+                '--use-channel',
+                use_chn,
+                '--term-list',
+                word_list_fn,
+                '--csv',
+                'kwsmap',
+                '--ave-precision-by-term']
+
+    args = get_arg_parser().parse_args(cmd_args)
+    args.func(args)
+
+
 def test_ctm_reference(dir_name, gzcnet_list_file):
     asreval.asreval_script.ext_audio_id = None
     ctm_fn = os.path.join(dir_name, '3test.ctm')
