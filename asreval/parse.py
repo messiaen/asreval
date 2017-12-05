@@ -22,7 +22,7 @@ __all__ = ['parse_stm_utterances',
 
 # TODO this parses some subset / extension of standard slf and stm files
 # Refactor to handle standard slf and stms files.  Allow users to pass in
-# special processing functions like ext_audio_id (see compute_map.py).
+# special processing functions like ext_audio_id (see asreval_script.py).
 
 cnet_uttr_re = re.compile(u'UTTERANCE=(.*)', re.UNICODE)
 cnet_uttr_info_re = re.compile(u'N=(\d+)\s+L=(\d+)', re.UNICODE)

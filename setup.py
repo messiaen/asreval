@@ -3,11 +3,10 @@ from setuptools import setup
 setup(
     name='asreval',
     description='Tool for evaluation asr and kws systems',
-    version='0.1.0',
+    version='0.2.0',
     packages=['asreval'],
     classifiers=[
         'Development Status :: 4 - Beta',
-        'Environment :: Console',
         'Environment :: Console',
         'Intended Audience :: Science/Research',
         'Operating System :: POSIX :: Linux',
@@ -28,7 +27,7 @@ setup(
     install_requires=['future', 'six'],
     entry_points={
         'console_scripts': [
-            'asreval-kwsmap = asreval.compute_map:main',
+            'asreval = asreval.asreval_script:main',
         ]
     }
 )

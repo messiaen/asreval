@@ -23,8 +23,10 @@ from asreval.parse import parse_stm_utterances
 from asreval.parse import parse_ctm_utterances
 from asreval.stm import Stm
 from asreval.mean_average_precision import kws_mean_ave_precision
+from asreval.word_uttr_scores import word_lst_uttr_scores
 
 from collections import defaultdict
+from collections import OrderedDict
 
 
 gzip_open = gzip.open
@@ -35,12 +37,31 @@ if six.PY2:
     gzip_open = py2_gzip_open
 
 
+def word_list_from_ref_uttrs(stm_uttrs):
+    word_list = OrderedDict()
+    for uttr in stm_uttrs:
+        for word in uttr.words:
+            word_list[word] = True
+    return list(word_list)
+
+
 def load_stm(truth_file):
+    return Stm(load_stm_uttrs(truth_file))
+
+
+def load_stm_uttrs(truth_file):
     with open(truth_file, 'r', encoding='utf-8') as f:
-        return Stm(parse_stm_utterances(f))
+        return list(parse_stm_utterances(f))
 
 
 def load_ctm(truth_file, max_uttr_len=15.0, max_silence=3.0):
+        return Stm(load_ctm_uttrs(
+            truth_file,
+            max_uttr_len=max_uttr_len,
+            max_silence=max_silence))
+
+
+def load_ctm_uttrs(truth_file, max_uttr_len=15.0, max_silence=3.0):
     max_len = None
     if max_uttr_len >= 0.0:
         max_len = max_uttr_len
@@ -50,11 +71,25 @@ def load_ctm(truth_file, max_uttr_len=15.0, max_silence=3.0):
         silence = max_silence
 
     with open(truth_file, 'r', encoding='utf-8') as f:
-        return Stm(parse_ctm_utterances(f, max_len, silence))
+        return list(parse_ctm_utterances(f, max_len, silence))
+
+
+def word_score_to_csv_row(score):
+    return u','.join(
+        map(lambda x: u'' if x is None else str(x),
+            [score.audio_id,
+             score.channel,
+             score.start_time,
+             score.end_time,
+             score.word,
+             score.score,
+             score.truth]))
 
 
 term_id = defaultdict()
-xml_line_re = re.compile(u'\s*<term termid="(.*)"><termtext>(.*)</termtext>.*', re.UNICODE)
+xml_line_re = re.compile(
+    u'\s*<term termid="(.*)"><termtext>(.*)</termtext>.*',
+    re.UNICODE)
 dict_line_re = re.compile(u'>(\S+)\s', re.UNICODE)
 
 
@@ -136,7 +171,7 @@ def load_cnets(cnet_list, use_channel):
 
 def get_arg_parser():
     parser = argparse.ArgumentParser(
-        prog='asreval-kwsmap',
+        prog='asreval',
         description='Compute Mean Average Precision for KWS')
 
     parser.add_argument('--term-list',
@@ -177,12 +212,6 @@ def get_arg_parser():
                         default=15.0,
                         help='Maximum len in seconds of a single utterance when using a ctm reference (-1.0 for no splitting on max len) (default: 15.0)')
 
-    parser.add_argument('--ave-precision-by-term',
-                        dest='list_ap',
-                        required=False,
-                        help='List average precision for each word.',
-                        action='store_true')
-
     parser.add_argument('--use-channel',
                         dest='use_channel',
                         required=False,
@@ -192,10 +221,54 @@ def get_arg_parser():
                              'before file extension',
                         choices=['file', 'directory'])
 
+    parser.add_argument('--csv',
+                        dest='csv',
+                        required=False,
+                        help='CSV style output instead of report style',
+                        default=False,
+                        action='store_true')
+
+    subparsers = parser.add_subparsers(title='subcommands')
+
+    kwsmap_parser = subparsers.add_parser('kwsmap', help='Compute Mean Average Precision for KWS (When outputing csv the first row has the overall MAP)')
+    kwsmap_parser.set_defaults(func=run_kwsmap)
+
+    kwsmap_parser.add_argument('--ave-precision-by-term',
+                               dest='list_ap',
+                               required=False,
+                               help='List average precision for each word.',
+                               action='store_true')
+
+    word_scores_parser = subparsers.add_parser(
+        'wordscores',
+        help='Compute scores for each word utterance pair (Outputs csv rows with audio_id,channel,start_time,stop_time,word,score,truth)')
+    word_scores_parser.set_defaults(func=run_word_scores)
+
     return parser
 
 
-def run_script(args):
+def run_word_scores(args):
+    truth_file = args.stm
+    if not truth_file:
+        truth_file = args.ctm
+        stm_uttrs = load_ctm_uttrs(truth_file, args.ctm_max_uttr_len, args.ctm_max_silence)
+    else:
+        stm_uttrs = load_stm_uttrs(truth_file)
+
+    term_list = []
+    if args.term_list:
+        term_list = load_word_list(args.term_list)
+    else:
+        term_list = word_list_from_ref_uttrs(stm_uttrs)
+
+    slf = load_cnets(args.cnet_list, args.use_channel)
+
+    for word_score in word_lst_uttr_scores(term_list, stm_uttrs, slf):
+        print(word_score_to_csv_row(word_score))
+        sys.stdout.flush()
+
+
+def run_kwsmap(args):
     truth_file = args.stm
     if not truth_file:
         truth_file = args.ctm
@@ -215,29 +288,90 @@ def run_script(args):
     map_score = results.mean_ave_precision
     word_ap = results.word_ap
 
-    print("\n")
-    print("Total speech duration (seconds): {}".format(slf.speech_dur))
-    print("Total number of terms: {}".format(len(term_list)))
-    print("Total possible hits: {}".format(results.total_possible_hits))
-    print("Total true positives: {}".format(int(results.total_tp)))
-    print("Total false positives: {}".format(int(results.total_fp)))
-    print("Total hypotheses not matching reference window: {}".format(
-        results.num_no_time_match_hypotheses))
-    print("Recall: {}".format(results.mean_ave_precision))
-    print("mAP: {}".format(map_score))
-    if args.list_ap:
-        print("\nAverage Precision for Words:")
-        for word in sorted(word_ap):
-            print(u'{} {} {}'.format(word,
-                                     word_ap[word],
-                                     stm.uttr_count(word)))
+    if args.csv:
+        for row in kwsmap_results_to_csv(
+                stm, slf, term_list, results, list_ap=args.list_ap):
+            print(row)
+            sys.stdout.flush()
+    else:
+        print("\n")
+        print("Total speech duration (seconds): {}".format(slf.speech_dur))
+        print("Total number of terms: {}".format(len(term_list)))
+        print("Total possible hits: {}".format(results.total_possible_hits))
+        print("Total true positives: {}".format(int(results.total_tp)))
+        print("Total false positives: {}".format(int(results.total_fp)))
+        print("Total hypotheses not matching reference window: {}".format(
+            results.num_no_time_match_hypotheses))
+        print("Recall: {}".format(results.recall))
+        print("mAP: {}".format(map_score))
+        if args.list_ap:
+            print("\nAverage Precision for Words:")
+            for word in sorted(word_ap):
+                print(u'{} {} {}'.format(word,
+                                         round(word_ap[word], 4),
+                                         stm.uttr_count(word)))
 
     return 0
 
 
+def kwsmap_results_csv_header():
+    return u','.join([u'word',
+              u'map',
+              u'utterance count',
+              u'total speech dur (sec)',
+              u'total terms',
+              u'possible hits',
+              u'true positives',
+              u'false positives',
+              u'hypotheses not matching ref window',
+              u'recall'])
+
+
+def kwsmap_results_to_csv(stm, slf, term_list, results, list_ap=False):
+    yield kwsmap_results_csv_header()
+    yield u','.join(map(str,
+                        [u'',
+                         results.mean_ave_precision,
+                         stm.total_uttr_count,
+                         slf.speech_dur,
+                         len(term_list),
+                         results.total_possible_hits,
+                         results.total_tp,
+                         results.total_fp,
+                         results.num_no_time_match_hypotheses,
+                         results.recall]))
+    if list_ap:
+        for word in sorted(results.word_ap):
+            yield ','.join(map(str,
+                               [word,
+                                round(results.word_ap[word], 4),
+                                stm.uttr_count(word),
+                                '',
+                                '',
+                                '',
+                                '',
+                                '',
+                                '',
+                                '']))
+
+
 def main():
     args = get_arg_parser().parse_args()
-    return run_script(args)
+    try:
+        return args.func(args)
+    except IOError as e:
+        try:
+            sys.stdout.flush()
+        finally:
+            try:
+                sys.stdout.close()
+            finally:
+                try:
+                    sys.stderr.flush()
+                finally:
+                    sys.stderr.close()
+    except Exception as e:
+        return 1
 
 
 if __name__ == '__main__':

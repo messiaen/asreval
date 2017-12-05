@@ -15,9 +15,8 @@ import os
 import pytest
 import contextlib
 
-import asreval.compute_map
-from asreval.compute_map import run_script
-from asreval.compute_map import get_arg_parser
+import asreval.asreval_script
+from asreval.asreval_script import get_arg_parser
 
 
 @contextlib.contextmanager
@@ -60,7 +59,7 @@ def cnet_unicode_list_file(dir_name):
 
 
 def test_run_script_uncompressed(dir_name, cnet_list_file):
-    asreval.compute_map.ext_audio_id = None
+    asreval.asreval_script.ext_audio_id = None
     stm_fn = os.path.join(dir_name, '3test.stm')
     cnet_lst = cnet_list_file
     use_chn = 'directory'
@@ -69,14 +68,33 @@ def test_run_script_uncompressed(dir_name, cnet_list_file):
                 '--cnet-list',
                 cnet_lst,
                 '--use-channel',
-                use_chn]
+                use_chn,
+                'kwsmap']
 
     args = get_arg_parser().parse_args(cmd_args)
-    run_script(args)
+    args.func(args)
+
+
+def test_run_script_uncompressed_perword_map(dir_name, cnet_list_file):
+    asreval.asreval_script.ext_audio_id = None
+    stm_fn = os.path.join(dir_name, '3test.stm')
+    cnet_lst = cnet_list_file
+    use_chn = 'directory'
+    cmd_args = ['--stm',
+                stm_fn,
+                '--cnet-list',
+                cnet_lst,
+                '--use-channel',
+                use_chn,
+                'kwsmap',
+                '--ave-precision-by-term']
+
+    args = get_arg_parser().parse_args(cmd_args)
+    args.func(args)
 
 
 def test_run_script_compressed(dir_name, gzcnet_list_file):
-    asreval.compute_map.ext_audio_id = None
+    asreval.asreval_script.ext_audio_id = None
     stm_fn = os.path.join(dir_name, '3test.stm')
     cnet_lst = gzcnet_list_file
     use_chn = 'directory'
@@ -85,14 +103,15 @@ def test_run_script_compressed(dir_name, gzcnet_list_file):
                 '--cnet-list',
                 cnet_lst,
                 '--use-channel',
-                use_chn]
+                use_chn,
+                'kwsmap']
 
     args = get_arg_parser().parse_args(cmd_args)
-    run_script(args)
+    args.func(args)
 
 
 def test_uncompressed_unicode(dir_name, cnet_unicode_list_file):
-    asreval.compute_map.ext_audio_id = None
+    asreval.asreval_script.ext_audio_id = None
     stm_fn = os.path.join(dir_name, '3test-utf8.stm')
     cnet_lst = cnet_unicode_list_file
     use_chn = 'directory'
@@ -101,14 +120,15 @@ def test_uncompressed_unicode(dir_name, cnet_unicode_list_file):
                 '--cnet-list',
                 cnet_lst,
                 '--use-channel',
-                use_chn]
+                use_chn,
+                'kwsmap']
 
     args = get_arg_parser().parse_args(cmd_args)
-    run_script(args)
+    args.func(args)
 
 
 def test_compressed_unicode(dir_name, gzcnet_unicode_list_file):
-    asreval.compute_map.ext_audio_id = None
+    asreval.asreval_script.ext_audio_id = None
     stm_fn = os.path.join(dir_name, '3test-utf8.stm')
     cnet_lst = gzcnet_unicode_list_file
     use_chn = 'directory'
@@ -117,14 +137,15 @@ def test_compressed_unicode(dir_name, gzcnet_unicode_list_file):
                 '--cnet-list',
                 cnet_lst,
                 '--use-channel',
-                use_chn]
+                use_chn,
+                'kwsmap']
 
     args = get_arg_parser().parse_args(cmd_args)
-    run_script(args)
+    args.func(args)
 
 
 def test_word_list_unicode(dir_name, gzcnet_unicode_list_file):
-    asreval.compute_map.ext_audio_id = None
+    asreval.asreval_script.ext_audio_id = None
     stm_fn = os.path.join(dir_name, '3test-utf8.stm')
     cnet_lst = gzcnet_unicode_list_file
     word_list_fn = os.path.join(dir_name, 'word_list.xml')
@@ -136,14 +157,37 @@ def test_word_list_unicode(dir_name, gzcnet_unicode_list_file):
                 '--use-channel',
                 use_chn,
                 '--term-list',
-                word_list_fn]
+                word_list_fn,
+                'kwsmap']
 
     args = get_arg_parser().parse_args(cmd_args)
-    run_script(args)
+    args.func(args)
+
+
+def test_word_list_unicode_csv(dir_name, gzcnet_unicode_list_file):
+    asreval.asreval_script.ext_audio_id = None
+    stm_fn = os.path.join(dir_name, '3test-utf8.stm')
+    cnet_lst = gzcnet_unicode_list_file
+    word_list_fn = os.path.join(dir_name, 'word_list.xml')
+    use_chn = 'directory'
+    cmd_args = ['--stm',
+                stm_fn,
+                '--cnet-list',
+                cnet_lst,
+                '--use-channel',
+                use_chn,
+                '--term-list',
+                word_list_fn,
+                '--csv',
+                'kwsmap',
+                '--ave-precision-by-term']
+
+    args = get_arg_parser().parse_args(cmd_args)
+    args.func(args)
 
 
 def test_ctm_reference(dir_name, gzcnet_list_file):
-    asreval.compute_map.ext_audio_id = None
+    asreval.asreval_script.ext_audio_id = None
     ctm_fn = os.path.join(dir_name, '3test.ctm')
     cnet_lst = gzcnet_list_file
     use_chn = 'directory'
@@ -152,12 +196,13 @@ def test_ctm_reference(dir_name, gzcnet_list_file):
                 '--cnet-list',
                 cnet_lst,
                 '--use-channel',
-                use_chn]
+                use_chn,
+                'kwsmap']
 
     args = get_arg_parser().parse_args(cmd_args)
-    run_script(args)
+    args.func(args)
 
-    asreval.compute_map.ext_audio_id = None
+    asreval.asreval_script.ext_audio_id = None
     ctm_fn = os.path.join(dir_name, '3test.ctm')
     cnet_lst = gzcnet_list_file
     use_chn = 'directory'
@@ -170,12 +215,13 @@ def test_ctm_reference(dir_name, gzcnet_list_file):
                 '--cnet-list',
                 cnet_lst,
                 '--use-channel',
-                use_chn]
+                use_chn,
+                'kwsmap']
 
     args = get_arg_parser().parse_args(cmd_args)
-    run_script(args)
+    args.func(args)
 
-    asreval.compute_map.ext_audio_id = None
+    asreval.asreval_script.ext_audio_id = None
     ctm_fn = os.path.join(dir_name, '3test.ctm')
     cnet_lst = gzcnet_list_file
     use_chn = 'directory'
@@ -188,7 +234,25 @@ def test_ctm_reference(dir_name, gzcnet_list_file):
                 '--cnet-list',
                 cnet_lst,
                 '--use-channel',
-                use_chn]
+                use_chn,
+                'kwsmap']
 
     args = get_arg_parser().parse_args(cmd_args)
-    run_script(args)
+    args.func(args)
+
+
+def test_run_word_scores_uncompressed(dir_name, cnet_list_file):
+    asreval.asreval_script.ext_audio_id = None
+    stm_fn = os.path.join(dir_name, '3test.stm')
+    cnet_lst = cnet_list_file
+    use_chn = 'directory'
+    cmd_args = ['--stm',
+                stm_fn,
+                '--cnet-list',
+                cnet_lst,
+                '--use-channel',
+                use_chn,
+                'wordscores']
+
+    args = get_arg_parser().parse_args(cmd_args)
+    args.func(args)

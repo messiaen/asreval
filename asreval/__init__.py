@@ -16,3 +16,8 @@ from asreval.stm import Stm
 
 from asreval.mean_average_precision import kws_mean_ave_precision
 from asreval.mean_average_precision import KwsMapResults
+
+from asreval.word_uttr_scores import word_uttr_scores
+from asreval.word_uttr_scores import word_lst_uttr_scores
+from asreval.word_uttr_scores import max_word_score
+from asreval.word_uttr_scores import WordUttrScore
