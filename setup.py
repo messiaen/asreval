@@ -24,7 +24,7 @@ setup(
     ],
     tests_require=['pytest'],
     setup_requires=['pytest-runner'],
-    install_requires=['future', 'six', 'numpy'],
+    install_requires=['future', 'six'],
     entry_points={
         'console_scripts': [
             'asreval = asreval.asreval_script:main',

@@ -5,7 +5,6 @@ from __future__ import absolute_import
 from future import standard_library
 standard_library.install_aliases()
 from collections import namedtuple
-import numpy as np
 
 
 __all__ = [
@@ -15,8 +14,9 @@ __all__ = [
 ]
 
 
-WordUttrScore = namedtuple('WordUttrScore',
-                           'audio_id channel word score truth')
+WordUttrScore = namedtuple(
+    'WordUttrScore',
+    'audio_id channel start_time end_time word score truth')
 
 
 def word_lst_uttr_scores(words, ref_uttrs, hypothesis):
@@ -29,7 +29,14 @@ def word_uttr_scores(word, ref_uttrs, hypothesis):
     for ref in ref_uttrs:
         score = max_word_score(word, ref, hypothesis)
         truth = 1 if word in ref else 0
-        yield WordUttrScore(ref.audio_id, ref.channel, word, score, truth)
+        yield WordUttrScore(
+            ref.audio_id,
+            ref.channel,
+            ref.start_time,
+            ref.end_time,
+            word,
+            score,
+            truth)
 
 
 def max_word_score(word, ref, hypothesis):
@@ -42,11 +49,12 @@ def max_word_score(word, ref, hypothesis):
     return score
 
 
-def truth_and_scores(word_scores):
-    truths = []
-    scores = []
-    for _, _, _, score, truth in word_scores:
-        truths.append(truth)
-        scores.append(score)
-
-    return np.array(truths, dtype='int'), np.array(scores, dtype='float64')
+# TODO for now we just output word uttr csv rows
+# def truth_and_scores(word_scores):
+#     truths = []
+#     scores = []
+#     for _, _, _, _, _, score, truth in word_scores:
+#         truths.append(truth)
+#         scores.append(score)
+#
+#     return np.array(truths, dtype='int'), np.array(scores, dtype='float64')

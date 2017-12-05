@@ -16,7 +16,6 @@ import argparse
 import gzip
 import sys
 import six
-import matplotlib
 
 from asreval.slf import SlfIndex
 from asreval.parse import parse_cnet_utterances
@@ -25,8 +24,6 @@ from asreval.parse import parse_ctm_utterances
 from asreval.stm import Stm
 from asreval.mean_average_precision import kws_mean_ave_precision
 from asreval.word_uttr_scores import word_lst_uttr_scores
-from asreval.word_uttr_scores import truth_and_scores
-from asreval.det import compute_det_curve
 
 from collections import defaultdict
 from collections import OrderedDict
@@ -80,11 +77,19 @@ def load_ctm_uttrs(truth_file, max_uttr_len=15.0, max_silence=3.0):
 def word_score_to_csv_row(score):
     return u','.join(
         map(lambda x: u'' if x is None else str(x),
-            [score.audio_id, score.channel, score.word, score.score, score.truth]))
+            [score.audio_id,
+             score.channel,
+             score.start_time,
+             score.end_time,
+             score.word,
+             score.score,
+             score.truth]))
 
 
 term_id = defaultdict()
-xml_line_re = re.compile(u'\s*<term termid="(.*)"><termtext>(.*)</termtext>.*', re.UNICODE)
+xml_line_re = re.compile(
+    u'\s*<term termid="(.*)"><termtext>(.*)</termtext>.*',
+    re.UNICODE)
 dict_line_re = re.compile(u'>(\S+)\s', re.UNICODE)
 
 
@@ -227,72 +232,12 @@ def get_arg_parser():
                                help='List average precision for each word.',
                                action='store_true')
 
-    word_scores_parser = subparsers.add_parser('wordscores', help='Compute scores for each word utterance pair')
+    word_scores_parser = subparsers.add_parser(
+        'wordscores',
+        help='Compute scores for each word utterance pair (Outputs csv rows with audio_id,channel,start_time,stop_time,word,score,truth)')
     word_scores_parser.set_defaults(func=run_word_scores)
 
-    det_curve_parser = subparsers.add_parser('det', help='Output x y values of det curve computed from word scores')
-    det_curve_parser.set_defaults(func=run_det_curve)
-
-    det_plot_parser = subparsers.add_parser('detplot', help='Output det plot to file')
-    det_plot_parser.set_defaults(func=run_det_plot)
-    det_plot_parser.add_argument('--out',
-                                 dest='plot_out',
-                                 required=True,
-                                 help='Plot image filename',
-                                 action='store')
-
     return parser
-
-
-def run_det_plot(args):
-    truth_file = args.stm
-    if not truth_file:
-        truth_file = args.ctm
-        stm_uttrs = load_ctm_uttrs(truth_file, args.ctm_max_uttr_len, args.ctm_max_silence)
-    else:
-        stm_uttrs = load_stm_uttrs(truth_file)
-
-    term_list = []
-    if args.term_list:
-        term_list = load_word_list(args.term_list)
-    else:
-        term_list = word_list_from_ref_uttrs(stm_uttrs)
-
-    slf = load_cnets(args.cnet_list, args.use_channel)
-
-    scores = word_lst_uttr_scores(term_list, stm_uttrs, slf)
-    truth, score = truth_and_scores(scores)
-    fps, fns, _ = compute_det_curve(truth, score)
-
-    matplotlib.use('Agg')
-    import matplotlib.pyplot as plt
-
-    plt.figure()
-    plt.plot(fps, fns)
-    plt.savefig(args.plot_out)
-
-
-def run_det_curve(args):
-    truth_file = args.stm
-    if not truth_file:
-        truth_file = args.ctm
-        stm_uttrs = load_ctm_uttrs(truth_file, args.ctm_max_uttr_len, args.ctm_max_silence)
-    else:
-        stm_uttrs = load_stm_uttrs(truth_file)
-
-    term_list = []
-    if args.term_list:
-        term_list = load_word_list(args.term_list)
-    else:
-        term_list = word_list_from_ref_uttrs(stm_uttrs)
-
-    slf = load_cnets(args.cnet_list, args.use_channel)
-
-    scores = word_lst_uttr_scores(term_list, stm_uttrs, slf)
-    truth, score = truth_and_scores(scores)
-    fps, fns, thresholds = compute_det_curve(truth, score)
-    for fp, fn, t in zip(fps, fns, thresholds):
-        print(','.join(map(str, [fp, fn, t])))
 
 
 def run_word_scores(args):
@@ -312,7 +257,8 @@ def run_word_scores(args):
     slf = load_cnets(args.cnet_list, args.use_channel)
 
     for word_score in word_lst_uttr_scores(term_list, stm_uttrs, slf):
-        print(word_score_to_csv_row(word_score), flush=True)
+        print(word_score_to_csv_row(word_score))
+        sys.stdout.flush()
 
 
 def run_kwsmap(args):
