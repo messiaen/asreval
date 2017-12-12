@@ -256,3 +256,23 @@ def test_run_word_scores_uncompressed(dir_name, cnet_list_file):
 
     args = get_arg_parser().parse_args(cmd_args)
     args.func(args)
+
+
+def test_run_word_scores_uncompressed_score_format(dir_name, cnet_list_file):
+    asreval.asreval_script.ext_audio_id = None
+    stm_fn = os.path.join(dir_name, '3test.stm')
+    cnet_lst = cnet_list_file
+    use_chn = 'directory'
+    cmd_args = ['--stm',
+                stm_fn,
+                '--cnet-list',
+                cnet_lst,
+                '--use-channel',
+                use_chn,
+                'wordscores',
+                '--score-format',
+                'log2',
+                '--default-score=-1e32']
+
+    args = get_arg_parser().parse_args(cmd_args)
+    args.func(args)

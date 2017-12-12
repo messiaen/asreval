@@ -13,12 +13,12 @@ $ python setup.py install
 ### compute_map
 
 ```
-$ asreval --help
+$ asreval -h
 usage: asreval [-h] [--term-list TERM_LIST] --cnet-list CNET_LIST
                (--stm STM | --ctm CTM) [--ctm-max-silence CTM_MAX_SILENCE]
                [--ctm-max-uttr-len CTM_MAX_UTTR_LEN]
                [--use-channel {file,directory}] [--csv]
-               {wordscores,kwsmap} ...
+               {kwsmap,wordscores} ...
 
 Compute Mean Average Precision for KWS
 
@@ -49,11 +49,45 @@ optional arguments:
   --csv                 CSV style output instead of report style
 
 subcommands:
-  {wordscores,kwsmap}
+  {kwsmap,wordscores}
     kwsmap              Compute Mean Average Precision for KWS (When outputing
                         csv the first row has the overall MAP)
     wordscores          Compute scores for each word utterance pair (Outputs
                         csv rows with audio_id,channel,start_time,stop_time,wo
                         rd,score,truth)
+```
+
+```
+$ asreval kwsmap -h
+usage: asreval kwsmap [-h] [--ave-precision-by-term]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --ave-precision-by-term
+                        List average precision for each word.
+```
+
+```
+$ asreval wordscores
+usage: asreval kwsmap [-h] [--ave-precision-by-term]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --ave-precision-by-term
+                        List average precision for each word.
+[gaclar3@rd6ul-92304g metrics]$ vim README.md 
+[gaclar3@rd6ul-92304g metrics]$ python -m asreval.asreval_script wordscores -h
+usage: asreval wordscores [-h] [--score-format {raw,posterior,log10,log2,ln}]
+                          [--default-score DEFAULT_SCORE]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --score-format {raw,posterior,log10,log2,ln}
+                        Format of raw cnet scores. These will be converted to
+                        posteriors for use in det curves unless raw is chosen
+                        (default: raw)
+  --default-score DEFAULT_SCORE
+                        Default score used as score for word not found in
+                        utterance (default: 0.0)
 ```
 
