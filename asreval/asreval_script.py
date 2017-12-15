@@ -24,6 +24,7 @@ from asreval.parse import parse_ctm_utterances
 from asreval.stm import Stm
 from asreval.mean_average_precision import kws_mean_ave_precision
 from asreval.word_uttr_scores import word_lst_uttr_scores
+from asreval.word_uttr_scores import score_converters
 
 from collections import defaultdict
 from collections import OrderedDict
@@ -244,6 +245,20 @@ def get_arg_parser():
         help='Compute scores for each word utterance pair (Outputs csv rows with audio_id,channel,start_time,stop_time,word,score,truth)')
     word_scores_parser.set_defaults(func=run_word_scores)
 
+    word_scores_parser.add_argument('--score-format',
+                                    dest='score_format',
+                                    required=False,
+                                    default='raw',
+                                    help='Format of raw cnet scores. These will be converted to posteriors for use in det curves unless raw is chosen (default: raw)',
+                                    choices=tuple(score_converters))
+
+    word_scores_parser.add_argument('--default-score',
+                                    dest='default_score',
+                                    required=False,
+                                    default=0.0,
+                                    help='Default score used as score for word not found in utterance (default: 0.0)',
+                                    type=float)
+
     return parser
 
 
@@ -251,7 +266,8 @@ def run_word_scores(args):
     truth_file = args.stm
     if not truth_file:
         truth_file = args.ctm
-        stm_uttrs = load_ctm_uttrs(truth_file, args.ctm_max_uttr_len, args.ctm_max_silence)
+        stm_uttrs = load_ctm_uttrs(
+            truth_file, args.ctm_max_uttr_len, args.ctm_max_silence)
     else:
         stm_uttrs = load_stm_uttrs(truth_file)
 
@@ -263,9 +279,9 @@ def run_word_scores(args):
 
     slf = load_cnets(args.cnet_list, args.use_channel)
 
-    for word_score in word_lst_uttr_scores(term_list, stm_uttrs, slf):
+    for word_score in word_lst_uttr_scores(
+            term_list, stm_uttrs, slf, convert_fn=args.score_format, default_score=args.default_score):
         print(word_score_to_csv_row(word_score))
-        sys.stdout.flush()
 
 
 def run_kwsmap(args):
