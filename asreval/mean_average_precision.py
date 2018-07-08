@@ -7,8 +7,10 @@ from builtins import next
 from builtins import int
 from future import standard_library
 standard_library.install_aliases()
+from future.utils import viewitems
 from collections import Counter
 from collections import namedtuple
+from collections import defaultdict
 
 from asreval.slf import LabeledSlfEdge
 
@@ -24,7 +26,9 @@ class KwsMapResults(object):
                  'total_fp',
                  'total_possible_hits',
                  'arc_counts',
-                 'no_time_match_counts']
+                 'no_time_match_counts',
+                 'word_stats',
+                 'stats']
 
     def __init__(self,
                  mean_ave_precision=None,
@@ -33,7 +37,9 @@ class KwsMapResults(object):
                  total_fp=None,
                  total_possible_hits=None,
                  arc_counts=None,
-                 no_time_match_counts=None):
+                 no_time_match_counts=None,
+                 word_stats=None,
+                 stats=None):
         self._mean_ave_precision = mean_ave_precision
         self.word_ap = word_ap
         self.total_tp = total_tp
@@ -41,6 +47,8 @@ class KwsMapResults(object):
         self.total_possible_hits = total_possible_hits
         self.arc_counts = arc_counts
         self.no_time_match_counts = no_time_match_counts
+        self.word_stats = word_stats
+        self.stats = stats
 
     @property
     def num_no_time_match_hypotheses(self):
@@ -103,6 +111,7 @@ def kws_mean_ave_precision(word_list, hypothesis, ref, min_match_ratio=0.5):
     word_ap = {}
     sum_ap = 0.0
     num_aps = 0
+    word_stats = {}
 
     for query_word in word_list:
         true_count = ref.uttr_count(query_word)
@@ -142,15 +151,87 @@ def kws_mean_ave_precision(word_list, hypothesis, ref, min_match_ratio=0.5):
         total_tp += ctp
         total_fp += cfp
 
+        stats = list(retrieval_metrics(sorted_best_arcs,
+                                 true_count,
+                                 ref.total_uttr_count))
+        word_stats[query_word] = stats
+
     if num_aps < 1:
         raise Exception('No terms in term list found in STM')
+
+    mean_stats = average_word_stats(word_stats)
+
     return KwsMapResults(sum_ap / num_aps,
                          word_ap,
                          total_tp,
                          total_fp,
                          total_possible_hits,
                          arc_counts,
-                         no_time_match_counts)
+                         no_time_match_counts,
+                         word_stats,
+                         mean_stats)
+
+
+def average_word_stats(word_stats):
+    max_rank = max((len(s) for _, s in viewitems(word_stats)))
+    mean_stats = [defaultdict(float) for _ in range(max_rank)]
+    for w, stats in viewitems(word_stats):
+        stats_lst = expand_list(stats, max_rank)
+        for i, stats_d in enumerate(stats_lst):
+            for n, s in viewitems(stats_d):
+                mean_stats[i][n] += s
+    for i, stats_d in enumerate(mean_stats):
+        for n, s in viewitems(stats_d):
+            mean_stats[i][n] /= len(word_stats)
+    return mean_stats
+
+
+def expand_list(lst, size):
+    return lst + [lst[-1]] * (size - len(lst))
+
+
+def retrieval_metrics(labeled_arcs, num_true, num_docs):
+    rank_tps = []
+    rank_fps = []
+    for tp, fp in _tied_tp_fp(labeled_arcs):
+        rank_tps.append(tp)
+        rank_fps.append(fp)
+    rank_tps = cumsum(rank_tps)
+    rank_fps = cumsum(rank_fps)
+
+    for tp, fp in zip(rank_tps, rank_fps):
+        if tp + fp == 0:
+            precision = 0
+        else:
+            precision = tp / float(tp + fp)
+        recall = tp / float(num_true)
+        if precision + recall == 0.0:
+            f1 = 0.0
+        else:
+            f1 = 2.0 * precision * recall / float(precision + recall)
+        fn = num_true - tp
+        num_false = num_docs - num_true
+        fpr = fp / num_false
+        fnr = fn / num_true
+        stats = {'tp': tp,
+                 'fp': fp,
+                 'fn': fn,
+                 'fpr': fpr,
+                 'fnr': fnr,
+                 'total_true': num_true,
+                 'total_false': num_false,
+                 'precision': precision,
+                 'recall': recall}
+        yield stats
+
+
+def cumsum(lst):
+    def _cumsum(lst):
+        total = 0.0
+        for item in lst:
+            total += item
+            yield total
+    return list(_cumsum(lst))
 
 
 def word_ave_precision(labeled_arcs, num_true):

@@ -303,6 +303,9 @@ def run_kwsmap(args):
 
     map_score = results.mean_ave_precision
     word_ap = results.word_ap
+    stats = results.stats
+    for i, stats_d in enumerate(stats):
+        print('{0:0.4f},{1:0.4f}'.format(stats_d['recall'], stats_d['precision']))
 
     if args.csv:
         for row in kwsmap_results_to_csv(
